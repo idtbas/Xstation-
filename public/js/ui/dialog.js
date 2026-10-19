@@ -11,7 +11,7 @@ export function initDialogs(root) {
 }
 
 // actions: [{ label, value, primary, danger }]
-export function dialog({ title, text = [], iconName = null, code = null, actions = [{ label: 'OK', value: true, primary: true }], content = null, cancelValue = null }) {
+export function dialog({ title, text = [], iconName = null, code = null, actions = [{ label: 'OK', value: true, primary: true }], content = null, cancelValue = null, initial = null, wide = false }) {
   return new Promise((resolve) => {
     let layer = null;
     const close = async (value) => {
@@ -32,7 +32,7 @@ export function dialog({ title, text = [], iconName = null, code = null, actions
     );
     const box = h(
       'div.dialog',
-      { role: 'dialog', 'aria-modal': 'true' },
+      { role: 'dialog', 'aria-modal': 'true', style: wide ? { width: 'min(56rem, 94vw)' } : undefined },
       iconName ? h('div.dlg-icon', icon(iconName)) : null,
       h('h2', title),
       ...[].concat(text).map((t) => h('p', t)),
@@ -46,7 +46,7 @@ export function dialog({ title, text = [], iconName = null, code = null, actions
     layer = nav.pushLayer(backdrop, {
       name: 'dialog',
       onBack: () => close(cancelValue),
-      initial: () => buttons.find((b, i) => actions[i].primary) || buttons[0],
+      initial: () => initial?.() || buttons.find((b, i) => actions[i].primary) || buttons[0],
     });
   });
 }

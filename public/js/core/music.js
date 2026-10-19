@@ -3,6 +3,7 @@
 
 import { audioContext, masterNode, reverbNode } from './sound.js';
 import { store } from './store.js';
+import { unlock } from './system.js';
 
 export const STATIONS = [
   {
@@ -107,6 +108,7 @@ class MusicEngine {
     this.step = 0;
     this.nextTime = ctx.currentTime + 0.1;
     this.timer = setInterval(() => this.schedule(), 50);
+    unlock('dj');
     store.set('music', { playing: true, station: st.id, title: st.title, mood: st.mood, lastStation: st.id });
   }
 

@@ -1,0 +1,640 @@
+/* ==========================================================================
+   Control Center (PS5-Stil, unten)  ×  Guide (Xbox-Stil, links)
+   ========================================================================== */
+
+/* ---------- Control Center ---------- */
+.cc-root {
+  position: absolute;
+  inset: 0;
+  z-index: 22;
+}
+.cc-dim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.82) 70%);
+  backdrop-filter: blur(6px) brightness(0.8);
+  animation: fade-in 320ms var(--ease-out) both;
+}
+.cc-root.out .cc-dim {
+  animation: fade-out 240ms linear both;
+}
+.cc-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0 4.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.cc-cards {
+  display: flex;
+  gap: 1.1rem;
+  align-items: flex-end;
+}
+.cc-card {
+  width: 21rem;
+  height: 10.5rem;
+  flex: none;
+  border-radius: var(--r-md);
+  padding: 1.2rem 1.35rem;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  background: rgba(30, 35, 46, 0.86);
+  border: 1px solid var(--line);
+  box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.5);
+  animation: cc-rise 560ms var(--ease-out) both;
+}
+.cc-card .cc-art {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.55;
+}
+.cc-card .cc-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(10, 12, 18, 0.1), rgba(10, 12, 18, 0.88));
+}
+.cc-card > :not(.cc-art):not(.cc-shade) {
+  position: relative;
+}
+.cc-card .cc-k {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.cc-card .cc-k .icon {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+.cc-card .cc-t {
+  font-size: 1.3rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.cc-card .cc-s {
+  font-size: 0.95rem;
+  color: var(--text-2);
+  margin-top: 0.25rem;
+}
+.cc-card .avatars {
+  display: flex;
+}
+.cc-card .avatars .avatar {
+  width: 2.2rem;
+  height: 2.2rem;
+  margin-right: -0.5rem;
+  box-shadow: 0 0 0 0.15rem rgba(30, 35, 46, 1);
+}
+.cc-card.focused {
+  transform: scale(1.04) translateY(-0.25rem);
+  box-shadow: var(--focus-ring);
+}
+@keyframes cc-rise {
+  from {
+    opacity: 0;
+    transform: translateY(3rem);
+  }
+}
+.cc-root.out .cc-card,
+.cc-root.out .cc-bar,
+.cc-root.out .cc-pop {
+  transition: transform 240ms var(--ease-in), opacity 200ms;
+  transform: translateY(2rem);
+  opacity: 0;
+}
+
+.cc-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 6rem;
+  padding: 0 1.5rem;
+  border-radius: var(--r-lg);
+  background: rgba(22, 26, 35, 0.9);
+  border: 1px solid var(--line);
+  backdrop-filter: var(--blur);
+  animation: cc-rise 520ms 60ms var(--ease-out) both;
+}
+.cc-icons {
+  display: flex;
+  gap: 0.85rem;
+  align-items: center;
+}
+.cc-icon {
+  position: relative;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--text);
+}
+.cc-icon .icon {
+  width: 1.8rem;
+  height: 1.8rem;
+}
+.cc-icon .badge {
+  position: absolute;
+  top: 0.2rem;
+  right: 0.1rem;
+}
+.cc-icon .tip {
+  position: absolute;
+  bottom: calc(100% + 0.9rem);
+  left: 50%;
+  transform: translate(-50%, 0.4rem);
+  white-space: nowrap;
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--r-sm);
+  background: #fff;
+  color: var(--text-inv);
+  font-size: 0.95rem;
+  font-weight: 600;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms, transform 280ms var(--ease-out);
+}
+.cc-icon.focused {
+  background: #fff;
+  color: var(--text-inv);
+  transform: scale(1.1);
+}
+.cc-icon.focused .tip {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.cc-icon.active::after {
+  content: '';
+  position: absolute;
+  bottom: -0.55rem;
+  left: 50%;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--accent);
+  transform: translateX(-50%);
+}
+.cc-sep {
+  width: 1px;
+  height: 2.5rem;
+  background: var(--line-2);
+  margin: 0 0.4rem;
+}
+.cc-right {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  color: var(--text-2);
+}
+.cc-right .cc-clock {
+  font-size: 1.6rem;
+  font-weight: 300;
+  color: var(--text);
+}
+.cc-right .net {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.95rem;
+}
+.cc-right .net .icon {
+  width: 1.3rem;
+  height: 1.3rem;
+}
+
+/* Popover über der Leiste (PS5: Karte für Ton, Ein/Aus usw.) */
+.cc-pop {
+  align-self: flex-start;
+  width: 30rem;
+  border-radius: var(--r-lg);
+  padding: 1.5rem;
+  background: rgba(26, 30, 40, 0.96);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-lg);
+  animation: pop-in 380ms var(--ease-out) both;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.cc-pop h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(1rem) scale(0.98);
+  }
+}
+
+/* Listenzeilen (von Control Center und Guide gemeinsam genutzt) */
+.row-btn {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  min-height: 3.6rem;
+  padding: 0.6rem 1rem;
+  border-radius: var(--r-sm);
+  text-align: left;
+  font-size: 1.08rem;
+  color: var(--text);
+}
+.row-btn > .icon {
+  width: 1.45rem;
+  height: 1.45rem;
+  color: var(--text-2);
+}
+.row-btn .rb-main {
+  flex: 1;
+  min-width: 0;
+}
+.row-btn .rb-title {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.row-btn .rb-sub {
+  font-size: 0.9rem;
+  color: var(--text-3);
+  margin-top: 0.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.row-btn .rb-end {
+  color: var(--text-3);
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.row-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+.row-btn.focused {
+  background: #fff;
+  color: var(--text-inv);
+}
+.row-btn.focused > .icon,
+.row-btn.focused .rb-sub,
+.row-btn.focused .rb-end {
+  color: rgba(0, 0, 0, 0.6);
+}
+.row-btn.selected .rb-end .icon {
+  color: var(--online);
+}
+.row-btn.danger.focused {
+  background: var(--danger);
+  color: #fff;
+}
+
+.slider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--r-sm);
+}
+.slider .track {
+  flex: 1;
+  height: 0.4rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.15);
+  position: relative;
+}
+.slider .fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+  background: var(--accent-grad);
+}
+.slider .knob {
+  position: absolute;
+  top: 50%;
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 50%;
+  background: #fff;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0.2rem 0.6rem rgba(0, 0, 0, 0.4);
+  transition: transform var(--t-fast);
+}
+.slider.focused {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 0.15rem #fff;
+}
+.slider.focused .knob {
+  transform: translate(-50%, -50%) scale(1.25);
+}
+.slider .val {
+  width: 3rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+}
+
+/* ---------- Guide ---------- */
+.guide-root {
+  position: absolute;
+  inset: 0;
+  z-index: 23;
+}
+.guide-dim {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  animation: fade-in 300ms both;
+}
+.guide-root.out .guide-dim {
+  animation: fade-out 240ms both;
+}
+.guide {
+  position: absolute;
+  top: 1.5rem;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  width: 34rem;
+  border-radius: var(--r-md);
+  background: rgba(24, 27, 34, 0.94);
+  border: 1px solid var(--line);
+  backdrop-filter: var(--blur);
+  box-shadow: 1.5rem 0 4rem rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: guide-in 420ms var(--ease-out) both;
+}
+.guide::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 0.25rem;
+  background: var(--accent-grad);
+}
+.guide-root.out .guide {
+  animation: guide-out 260ms var(--ease-in) both;
+}
+@keyframes guide-in {
+  from {
+    transform: translateX(-108%);
+    opacity: 0.4;
+  }
+}
+@keyframes guide-out {
+  to {
+    transform: translateX(-108%);
+    opacity: 0.4;
+  }
+}
+.g-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 1.5rem 0.75rem;
+}
+.g-user {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+.g-user .avatar {
+  width: 3rem;
+  height: 3rem;
+}
+.g-user b {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.g-user small {
+  color: var(--text-3);
+  font-size: 0.9rem;
+}
+.g-clock {
+  font-size: 1.3rem;
+  font-weight: 300;
+}
+.g-tabs {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.5rem 1rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.g-tab {
+  flex: 1;
+  height: 3.6rem;
+  display: grid;
+  place-items: center;
+  position: relative;
+  color: var(--text-3);
+  border-radius: var(--r-sm) var(--r-sm) 0 0;
+}
+.g-tab .icon {
+  width: 1.6rem;
+  height: 1.6rem;
+}
+.g-tab .badge {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.6rem;
+}
+.g-tab.active {
+  color: #fff;
+}
+.g-tab.active::after {
+  content: '';
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  bottom: -1px;
+  height: 0.22rem;
+  border-radius: 1rem;
+  background: var(--accent-grad);
+}
+.g-tab.focused {
+  background: #fff;
+  color: var(--text-inv);
+}
+.g-tab .xs-mark {
+  width: 1.7rem !important;
+  height: 1.7rem !important;
+}
+.g-title {
+  padding: 1.1rem 1.5rem 0.4rem;
+  font-size: 1.35rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.g-title small {
+  color: var(--text-3);
+  font-size: 0.9rem;
+  font-weight: 400;
+}
+.g-body {
+  flex: 1;
+  min-height: 0;
+  padding: 0.25rem 1rem 1.25rem;
+  animation: g-swap 320ms var(--ease-out) both;
+}
+@keyframes g-swap {
+  from {
+    opacity: 0;
+    transform: translateX(1rem);
+  }
+}
+.g-section {
+  margin-top: 1rem;
+}
+.g-section > .g-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  padding: 0 1rem 0.4rem;
+}
+.g-empty {
+  color: var(--text-3);
+  padding: 1rem;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.g-actions {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.5rem 1rem;
+  flex-wrap: wrap;
+}
+.g-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.4rem;
+  padding: 1.5rem 1rem 1rem;
+}
+.g-profile .avatar {
+  width: 7rem;
+  height: 7rem;
+  margin-bottom: 0.5rem;
+}
+.g-profile h3 {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+.g-profile .sub {
+  color: var(--text-3);
+}
+.g-profile .status-line {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-2);
+}
+.g-profile .bio {
+  color: var(--text-2);
+  font-size: 1rem;
+  max-width: 26rem;
+  line-height: 1.45;
+}
+.g-stats {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+.dot-inline {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 50%;
+  background: var(--offline);
+  display: inline-block;
+}
+.dot-inline[data-status='online'] {
+  background: var(--online);
+}
+.dot-inline[data-status='busy'] {
+  background: var(--busy);
+}
+.dot-inline[data-status='away'] {
+  background: var(--away);
+}
+.g-search {
+  padding: 0.75rem 1rem;
+}
+.g-search .input {
+  width: 100%;
+}
+
+/* Chat */
+.chat {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.chat-log {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 0.5rem;
+}
+.msg {
+  max-width: 80%;
+  padding: 0.65rem 0.95rem;
+  border-radius: 1rem;
+  font-size: 1rem;
+  line-height: 1.4;
+  background: rgba(255, 255, 255, 0.09);
+  align-self: flex-start;
+  border-bottom-left-radius: 0.3rem;
+  user-select: text;
+  word-wrap: break-word;
+  animation: rise-in 300ms var(--ease-out) both;
+}
+.msg.mine {
+  align-self: flex-end;
+  background: var(--accent-grad);
+  border-bottom-left-radius: 1rem;
+  border-bottom-right-radius: 0.3rem;
+}
+.msg time {
+  display: block;
+  font-size: 0.75rem;
+  opacity: 0.6;
+  margin-top: 0.2rem;
+}
+.chat-input {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.75rem 0.5rem 0;
+}
+.chat-input .input {
+  flex: 1;
+  height: 3rem;
+}

@@ -684,8 +684,17 @@ textarea.input {
 .achv-text {
   padding: 0 2rem 0 0.75rem;
   white-space: nowrap;
-  opacity: 0;
-  animation: fade-in 400ms 820ms both;
+  animation: achv-text-in 420ms 820ms var(--ease-out) both;
+}
+@keyframes achv-text-in {
+  from {
+    opacity: 0;
+    transform: translateX(-0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 .achv-text .a1 {
   font-size: 0.9rem;
@@ -867,4 +876,13 @@ textarea.input {
   :root {
     font-size: 2.35vw;
   }
+}
+
+/* Fokussierbare Textblöcke (zum Scrollen mit dem Controller) */
+.focus-block {
+  border-radius: var(--r-md);
+  transition: box-shadow var(--t-med) var(--ease-ps);
+}
+.focus-block.focused {
+  box-shadow: 0 0 0 0.15rem rgba(255, 255, 255, 0.85);
 }

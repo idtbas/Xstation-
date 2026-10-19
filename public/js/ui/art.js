@@ -143,8 +143,8 @@ ${stars(rand, 120, 450)}
 <ellipse cx="960" cy="760" rx="1400" ry="260" fill="url(#haze)"/>
 <path d="${ridge(rand, { base: 640, amp: 190, steps: 16, jag: 1.1 })}" fill="#5a3a78" opacity="0.85"/>
 <path d="${ridge(rand, { base: 760, amp: 150, steps: 14, jag: 1.2 })}" fill="#3a2556"/>
-<g fill="#22163a">
-  <path d="${ridge(rand, { base: 860, amp: 110, steps: 12, jag: 1.3 })}"/>
+<path d="${ridge(rand, { base: 860, amp: 110, steps: 12, jag: 1.3 })}" fill="#22163a"/>
+<g fill="#22163a" transform="translate(1010 190) scale(0.62)">
   <rect x="560" y="520" width="42" height="210"/><rect x="610" y="470" width="58" height="260"/><rect x="676" y="540" width="40" height="190"/>
   <path d="M606 470 L639 410 L672 470 Z"/><path d="M556 520 L581 478 L606 520 Z"/><path d="M672 540 L696 500 L720 540 Z"/>
   <rect x="520" y="600" width="240" height="140"/>
@@ -433,9 +433,9 @@ export function appArt(app, variant = 'hero') {
   const square = variant === 'square';
   const w = square ? 512 : W;
   const hh = square ? 512 : H;
-  const iconSize = square ? 200 : 520;
-  const ix = square ? (w - iconSize) / 2 : w * 0.66 - iconSize / 2;
-  const iy = (hh - iconSize) / 2;
+  const iconSize = square ? 200 : 460;
+  const ix = square ? (w - iconSize) / 2 : w * 0.6 - iconSize / 2;
+  const iy = square ? (hh - iconSize) / 2 : hh * 0.1;
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${hh}" preserveAspectRatio="xMidYMid slice">
 <defs>
   <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient>
@@ -445,8 +445,8 @@ export function appArt(app, variant = 'hero') {
 <rect width="${w}" height="${hh}" fill="url(#g)"/>
 <rect width="${w}" height="${hh}" fill="url(#d)"/>
 <rect width="${w}" height="${hh}" fill="url(#l)"/>
-${square ? '' : `<g fill="none" stroke="#fff" stroke-opacity="0.07" stroke-width="2">${Array.from({ length: 9 }, (_, i) => `<circle cx="${w * 0.66}" cy="${hh / 2}" r="${180 + i * 120}"/>`).join('')}</g>`}
-<g transform="translate(${ix} ${iy}) scale(${iconSize / 24})" fill="none" stroke="#fff" stroke-width="${square ? 1.5 : 1}" stroke-linecap="round" stroke-linejoin="round" opacity="${square ? 1 : 0.9}">${ICONS[app.icon]}</g>
+${square ? '' : `<g fill="none" stroke="#fff" stroke-opacity="0.07" stroke-width="2">${Array.from({ length: 9 }, (_, i) => `<circle cx="${w * 0.6}" cy="${hh * 0.1 + 230}" r="${180 + i * 120}"/>`).join('')}</g>`}
+<g transform="translate(${ix} ${iy}) scale(${iconSize / 24})" fill="none" stroke="#fff" stroke-width="${square ? 1.5 : 1}" stroke-linecap="round" stroke-linejoin="round" opacity="${square ? 1 : 0.28}">${ICONS[app.icon]}</g>
 </svg>`;
   return toUrl(key, svg);
 }

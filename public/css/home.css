@@ -1,0 +1,707 @@
+/* ==========================================================================
+   Startseite – oben PS5 (Kachelreihe, großes Hintergrundbild, Hub-Karten),
+   darunter Xbox (Kachel-Blöcke für Freunde, Store, Erfolge)
+   ========================================================================== */
+
+.home-screen {
+  --tile: 7.25rem;
+  --tile-focus: 10.75rem;
+  --tile-gap: 1rem;
+  --pad-x: 5.5rem;
+}
+
+/* ---------- Hintergrund ---------- */
+.home-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: var(--bg);
+}
+.hero-img {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transform: scale(1.06);
+  transition: opacity var(--t-bg) var(--ease-in-out), transform 2.4s var(--ease-out);
+}
+.hero-img.show {
+  opacity: 1;
+  transform: scale(1);
+}
+.home-screen canvas.ambient {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transition: opacity 1.2s;
+  mix-blend-mode: screen;
+}
+.hero-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(4, 6, 11, 0.78) 0%, rgba(4, 6, 11, 0.15) 22%, rgba(4, 6, 11, 0.05) 40%, rgba(4, 6, 11, 0.7) 72%, rgba(4, 6, 11, 0.96) 100%),
+    linear-gradient(90deg, rgba(4, 6, 11, 0.72) 0%, rgba(4, 6, 11, 0.15) 55%, rgba(4, 6, 11, 0) 100%);
+  transition: background var(--t-slow);
+}
+.home-screen.scrolled .hero-shade {
+  background: linear-gradient(180deg, rgba(4, 6, 11, 0.85), rgba(4, 6, 11, 0.94));
+}
+.home-screen .hero-blur {
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(0px);
+  transition: backdrop-filter var(--t-slow) var(--ease-ps);
+  pointer-events: none;
+}
+.home-screen.scrolled .hero-blur {
+  backdrop-filter: blur(18px);
+}
+
+/* ---------- Scrollbereich ---------- */
+.home-scroll {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+}
+.home-scroll::-webkit-scrollbar {
+  display: none;
+}
+.home-page {
+  min-height: 100%;
+  padding-bottom: 8rem;
+}
+
+/* ---------- Kopfzeile ---------- */
+.home-top {
+  height: 7rem;
+  padding: 0 var(--pad-x);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.home-tabs {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.home-tab {
+  height: 3rem;
+  padding: 0 1.4rem;
+  border-radius: var(--r-pill);
+  font-size: 1.45rem;
+  font-weight: 500;
+  color: var(--text-3);
+}
+.home-tab.active {
+  color: #fff;
+}
+.home-tab.focused {
+  background: #fff;
+  color: var(--text-inv);
+  transform: scale(1.04);
+}
+.home-tab:hover:not(.focused) {
+  color: var(--text-2);
+}
+.top-right {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.top-right .icon-btn {
+  position: relative;
+}
+.top-right .icon-btn .badge {
+  position: absolute;
+  top: 0.15rem;
+  right: 0.1rem;
+}
+.top-avatar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.3rem 1rem 0.3rem 0.3rem;
+  border-radius: var(--r-pill);
+  margin-left: 0.5rem;
+}
+.top-avatar .avatar {
+  width: 2.6rem;
+  height: 2.6rem;
+}
+.top-avatar .ta-name {
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+.top-avatar .ta-score {
+  font-size: 0.85rem;
+  color: var(--text-3);
+}
+.top-avatar.focused {
+  background: #fff;
+  color: var(--text-inv);
+}
+.top-avatar.focused .ta-score {
+  color: rgba(0, 0, 0, 0.55);
+}
+.home-clock {
+  font-size: 1.5rem;
+  font-weight: 300;
+  margin-left: 1.25rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- PS5-Kachelreihe ---------- */
+.home-row-wrap {
+  height: var(--tile-focus);
+  padding-left: var(--pad-x);
+  margin-top: 0.75rem;
+  position: relative;
+}
+.home-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--tile-gap);
+  transition: transform 520ms var(--ease-ps), opacity 300ms;
+  will-change: transform;
+}
+.home-row.swap {
+  opacity: 0;
+  transform: translateY(-1rem) !important;
+}
+.tile {
+  display: flex;
+  align-items: flex-start;
+  flex: none;
+  border-radius: var(--r-md);
+  text-align: left;
+}
+.tile-art {
+  position: relative;
+  width: var(--tile);
+  height: var(--tile);
+  border-radius: var(--r-md);
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.45);
+  transition: width 420ms var(--ease-ps), height 420ms var(--ease-ps), box-shadow 420ms var(--ease-ps), transform 200ms;
+  overflow: hidden;
+  flex: none;
+}
+.tile-art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+.tile-name {
+  position: absolute;
+  left: 0.6rem;
+  right: 0.6rem;
+  bottom: 0.55rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-shadow: 0 0.1rem 0.6rem rgba(0, 0, 0, 0.8);
+  transition: font-size 420ms var(--ease-ps);
+}
+.tile.focused .tile-name {
+  font-size: 1.25rem;
+}
+.tile-name.t-wide,
+.tile-name.t-light {
+  letter-spacing: 0.1em;
+}
+.xb-zone {
+  border-top-color: transparent;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent) top / 100% 1px no-repeat;
+}
+.tile-art .dl-ring {
+  position: absolute;
+  inset: auto 0.5rem 0.5rem auto;
+  width: 2rem;
+  height: 2rem;
+}
+.tile-label {
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  padding-left: 0;
+  font-size: 1.6rem;
+  font-weight: 500;
+  align-self: center;
+  transform: translateX(-0.75rem);
+  transition: max-width 420ms var(--ease-ps), opacity 260ms 60ms, transform 420ms var(--ease-ps), padding 420ms var(--ease-ps);
+}
+.tile.focused .tile-art {
+  width: var(--tile-focus);
+  height: var(--tile-focus);
+  box-shadow: 0 0 0 0.2rem #fff, 0 0 2.5rem rgba(255, 255, 255, 0.22), 0 1.25rem 3rem rgba(0, 0, 0, 0.6);
+}
+.tile.focused .tile-label {
+  max-width: 26rem;
+  opacity: 1;
+  padding: 0 1.25rem 0 1.5rem;
+  transform: none;
+}
+.tile.pressed .tile-art {
+  transform: scale(0.96);
+}
+.tile.not-installed .tile-art {
+  filter: saturate(0.6) brightness(0.8);
+}
+.tile.not-installed.focused .tile-art {
+  filter: none;
+}
+
+/* Titel-Stile der fiktiven Spiele */
+.t-italic {
+  font-style: italic;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.t-serif {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+}
+.t-mono {
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.t-rounded {
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.t-wide {
+  font-weight: 300;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+.t-bold {
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+.t-light {
+  font-weight: 200;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+.t-sport {
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ---------- Info-Bereich unter der Reihe ---------- */
+.home-info {
+  padding: 0 var(--pad-x);
+  margin-top: 4.5rem;
+  min-height: 19rem;
+  display: grid;
+  grid-template-columns: 1fr 26rem;
+  gap: 3rem;
+  align-items: end;
+}
+.info-main > * {
+  animation: info-in 560ms var(--ease-out) both;
+}
+.info-main > :nth-child(2) {
+  animation-delay: 50ms;
+}
+.info-main > :nth-child(3) {
+  animation-delay: 100ms;
+}
+.info-main > :nth-child(4) {
+  animation-delay: 150ms;
+}
+@keyframes info-in {
+  from {
+    opacity: 0;
+    transform: translateX(-1.25rem);
+  }
+}
+.info-title {
+  font-size: 4.4rem;
+  line-height: 1.02;
+  margin: 0;
+  text-shadow: 0 0.25rem 2rem rgba(0, 0, 0, 0.5);
+}
+.info-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+  color: var(--text-2);
+  font-size: 1.1rem;
+}
+.info-desc {
+  margin-top: 0.85rem;
+  max-width: 44rem;
+  color: var(--text-2);
+  font-size: 1.15rem;
+  line-height: 1.5;
+}
+.info-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.75rem;
+  align-items: center;
+}
+.info-actions .btn-play {
+  min-width: 13rem;
+}
+.dl-progress {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 18rem;
+  font-size: 1rem;
+  color: var(--text-2);
+}
+.bar {
+  height: 0.35rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.15);
+  overflow: hidden;
+  flex: 1;
+}
+.bar > div {
+  height: 100%;
+  background: var(--accent-grad);
+  border-radius: inherit;
+  transition: width 300ms linear;
+}
+.info-side {
+  animation: rise-in 600ms 120ms var(--ease-out) both;
+}
+.stat-card {
+  border-radius: var(--r-lg);
+  padding: 1.5rem 1.75rem;
+  display: grid;
+  gap: 1.1rem;
+}
+.stat-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.stat-row .icon {
+  width: 1.6rem;
+  height: 1.6rem;
+  color: var(--text-2);
+}
+.stat-row .s-label {
+  font-size: 0.95rem;
+  color: var(--text-3);
+}
+.stat-row .s-value {
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+.ring {
+  width: 4.25rem;
+  height: 4.25rem;
+  flex: none;
+  position: relative;
+}
+.ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.ring span {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* ---------- Hub-Karten (PS5) ---------- */
+.home-section {
+  padding: 0 var(--pad-x);
+  margin-top: 3.25rem;
+}
+.home-section h2 {
+  font-size: 1.35rem;
+  font-weight: 500;
+  margin: 0 0 1.1rem;
+  color: var(--text-2);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.cards-row {
+  display: flex;
+  gap: 1.25rem;
+}
+.hub-card {
+  width: 22rem;
+  height: 12.5rem;
+  flex: none;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  position: relative;
+  text-align: left;
+  background: var(--panel-solid);
+  box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.4);
+}
+.hub-card .hc-art {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  transition: transform 700ms var(--ease-out);
+}
+.hub-card .hc-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 25%, rgba(0, 0, 0, 0.85) 100%);
+}
+.hub-card .hc-body {
+  position: absolute;
+  left: 1.25rem;
+  right: 1.25rem;
+  bottom: 1.1rem;
+}
+.hub-card .hc-kicker {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-2);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.hub-card .hc-kicker .icon {
+  width: 1rem;
+  height: 1rem;
+}
+.hub-card .hc-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-top: 0.35rem;
+  line-height: 1.25;
+}
+.hub-card .hc-sub {
+  font-size: 0.95rem;
+  color: var(--text-2);
+  margin-top: 0.3rem;
+}
+.hub-card .bar {
+  margin-top: 0.75rem;
+}
+.hub-card.focused {
+  transform: scale(1.04);
+  box-shadow: var(--focus-ring);
+}
+.hub-card.focused .hc-art {
+  transform: scale(1.06);
+}
+
+/* ---------- Xbox-Blöcke ---------- */
+.xb-zone {
+  margin-top: 4rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid var(--line);
+}
+.xb-grid {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: nowrap;
+}
+.xb-tile {
+  width: 13.5rem;
+  height: 13.5rem;
+  flex: none;
+  border-radius: var(--r-xs);
+  background: rgba(255, 255, 255, 0.06);
+  position: relative;
+  overflow: hidden;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+.xb-tile.wide {
+  width: 27.75rem;
+}
+.xb-tile .xt-art {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+}
+.xb-tile .xt-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.8));
+}
+.xb-tile > :not(.xt-art):not(.xt-shade) {
+  position: relative;
+}
+.xb-tile .xt-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.xb-tile .xt-sub {
+  font-size: 0.9rem;
+  color: var(--text-2);
+  margin-top: 0.25rem;
+  line-height: 1.3;
+}
+.xb-tile .xt-top {
+  position: absolute !important;
+  top: 0.9rem;
+  left: 0.9rem;
+  right: 0.9rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.xb-tile .xt-center {
+  position: absolute !important;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding-bottom: 2.5rem;
+}
+.xb-tile .xt-center .avatar {
+  width: 6rem;
+  height: 6rem;
+}
+.xb-tile .xt-center > .icon {
+  width: 3.25rem;
+  height: 3.25rem;
+  color: var(--text-2);
+}
+.xb-tile.focused {
+  transform: scale(1.05);
+  z-index: 2;
+  box-shadow: 0 0 0 0.2rem #fff, 0 1rem 2.5rem rgba(0, 0, 0, 0.6);
+}
+.xb-tile.accent {
+  background: linear-gradient(135deg, var(--xb-green-deep), #0e7a0e);
+}
+.xb-tile.accent-blue {
+  background: linear-gradient(135deg, var(--ps-blue-deep), var(--ps-blue));
+}
+.price {
+  display: inline-flex;
+  align-items: center;
+  height: 1.6rem;
+  padding: 0 0.6rem;
+  border-radius: 0.3rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: var(--xb-green);
+  color: #fff;
+}
+.price.owned {
+  background: rgba(255, 255, 255, 0.18);
+}
+.empty-note {
+  color: var(--text-3);
+  font-size: 1rem;
+  padding: 1rem 0;
+}
+
+/* ---------- X-Station-Taste (Maus / Touch) ---------- */
+.xs-fab {
+  position: absolute;
+  left: 2rem;
+  bottom: 1.6rem;
+  z-index: 15;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(20, 24, 33, 0.7);
+  border: 1px solid var(--line);
+  backdrop-filter: var(--blur);
+  transition: transform var(--t-med) var(--ease-ps), opacity var(--t-med), box-shadow var(--t-med);
+}
+.xs-fab:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 1.5rem var(--accent-glow);
+}
+.xs-fab .xs-mark {
+  width: 2rem !important;
+  height: 2rem !important;
+}
+body[data-input='gamepad'] .xs-fab,
+body[data-input='keyboard'] .xs-fab {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ---------- Spielstart ---------- */
+.launch {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  background: #000;
+  animation: fade-in 400ms both;
+}
+.launch .l-art {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  animation: launch-zoom 2.6s var(--ease-out) both;
+}
+.launch .l-shade {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 30%, rgba(0, 0, 0, 0.75));
+}
+.launch .l-title {
+  position: absolute;
+  left: 5rem;
+  bottom: 4.5rem;
+  font-size: 4rem;
+  animation: rise-in 900ms 300ms var(--ease-out) both;
+  text-shadow: 0 0.3rem 2rem rgba(0, 0, 0, 0.6);
+}
+.launch .l-spin {
+  position: absolute;
+  right: 4rem;
+  bottom: 4.5rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  color: var(--text-2);
+  font-size: 1.1rem;
+}
+.launch.out {
+  animation: fade-out 500ms both;
+}
+@keyframes launch-zoom {
+  from {
+    transform: scale(1);
+    filter: brightness(0.4);
+  }
+  to {
+    transform: scale(1.12);
+    filter: brightness(1);
+  }
+}

@@ -206,6 +206,13 @@
   window.addEventListener('hashchange', report);
   setInterval(report, 1500);
 
+  // Befehle der App (Scrollen per Controller, Zurück/Vor)
+  window.addEventListener('message', function (ev) {
+    if (ev.source !== parent || !ev.data || !ev.data.xs) return;
+    var d = ev.data;
+    if (d.xs === 'scroll') window.scrollBy({ top: d.dy || 0, left: d.dx || 0, behavior: d.smooth ? 'smooth' : 'auto' });
+  });
+
   // Tastatur: Escape/Home zurück an die App geben
   window.addEventListener(
     'keydown',

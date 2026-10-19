@@ -1,6 +1,6 @@
 // X-Station – Einstiegspunkt
 
-import { applyPrefs, bus } from './core/store.js';
+import { applyPrefs, bus, pushRecent } from './core/store.js';
 import { initInput } from './core/input.js';
 import { screens } from './core/screens.js';
 import { api } from './core/api.js';
@@ -14,6 +14,9 @@ import { usersScreen, loginScreen, registerScreen } from './apps/users.js';
 import { afterBoot } from './apps/flow.js';
 import { registerApps } from './apps/registry.js';
 import { toggleControlCenter, toggleGuide } from './apps/overlays.js';
+import { logoMark } from './ui/logo.js';
+
+const SYSTEM_SCREENS = ['power', 'boot', 'terms', 'users', 'login', 'register', 'rest'];
 
 async function main() {
   applyPrefs();
@@ -33,10 +36,30 @@ async function main() {
   registerApps(screens);
 
   bus.on('action', (action) => {
-    const inSession = !['power', 'boot', 'terms', 'users', 'login', 'register', 'rest'].includes(screens.current()?.name);
+    const inSession = !SYSTEM_SCREENS.includes(screens.current()?.name);
     if (action === 'home' && inSession) return toggleControlCenter();
     if (action === 'guide' && inSession) return toggleGuide();
     screens.current()?.instance.onAction?.(action);
+  });
+
+  // X-Station-Taste für Maus/Touch: Klick = Control Center, Rechtsklick = Guide
+  const fab = document.createElement('button');
+  fab.className = 'xs-fab';
+  fab.setAttribute('aria-label', 'Control Center öffnen');
+  fab.title = 'Control Center (Rechtsklick: Guide)';
+  fab.append(logoMark({ size: '2rem' }));
+  fab.addEventListener('click', () => toggleControlCenter());
+  fab.addEventListener('contextmenu', (ev) => {
+    ev.preventDefault();
+    toggleGuide();
+  });
+  document.getElementById('app').append(fab);
+
+  // „Zuletzt verwendet“ für Control Center & Guide
+  bus.on('screen', ({ name, params, instance }) => {
+    if (instance.recent) pushRecent({ id: name, params, ...instance.recent });
+    fab.style.display = SYSTEM_SCREENS.includes(name) ? 'none' : '';
+    document.body.dataset.screen = name;
   });
 
   await api.init();

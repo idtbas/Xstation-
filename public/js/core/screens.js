@@ -93,7 +93,7 @@ export const screens = {
     });
     setHints(to.instance.hints || DEFAULT_HINTS);
     to.instance.onShow?.(direction);
-    bus.emit('screen', to.name);
+    bus.emit('screen', { name: to.name, params: to.params, instance: to.instance });
 
     if (transition === 'none' || !from) {
       if (from) from.instance.el.remove();

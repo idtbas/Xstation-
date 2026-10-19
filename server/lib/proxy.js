@@ -290,7 +290,7 @@ export function createWebProxy({ secret, allowPrivate = false, userExists = () =
     if (target.protocol !== 'http:' && target.protocol !== 'https:') {
       return sendError(res, 400, 'Nicht unterstützt', 'Nur http- und https-Adressen können geöffnet werden.', target.href);
     }
-    if (!ALLOWED_PORTS.has(target.port)) {
+    if (!allowPrivate && !ALLOWED_PORTS.has(target.port)) {
       return sendError(res, 403, 'Port gesperrt', 'Aus Sicherheitsgründen sind nur Standard-Ports erlaubt.', target.href);
     }
     const host = target.hostname.replace(/^\[|\]$/g, '');
