@@ -1,6 +1,7 @@
 // UI-Klänge, komplett per Web Audio synthetisiert (keine Original-Sounds).
 
 import { prefs, bus } from './store.js';
+import { rumble } from './haptics.js';
 
 let ctx = null;
 let master = null;
@@ -143,6 +144,7 @@ const SOUNDS = {
 };
 
 export function play(name) {
+  rumble(name);
   if (!prefs.get('sounds')) return;
   if (!ensure() || ctx.state !== 'running') return;
   if (name === 'move') {

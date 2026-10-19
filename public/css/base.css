@@ -882,3 +882,59 @@ textarea.input {
 .focus-block.focused {
   box-shadow: 0 0 0 0.15rem rgba(255, 255, 255, 0.85);
 }
+
+/* ---------- Nur Desktop: Hinweis für Smartphones & Tablets ---------- */
+.desktop-only {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  font-size: 16px;
+}
+.desktop-only .do-card {
+  position: relative;
+  max-width: 420px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.desktop-only .xs-logo {
+  --logo-size: 34px !important;
+  margin-bottom: 12px;
+}
+.desktop-only h1 {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 300;
+}
+.desktop-only p {
+  margin: 0;
+  color: var(--text-2);
+  line-height: 1.55;
+  font-size: 16px;
+}
+.desktop-only .do-small {
+  color: var(--text-3);
+  font-size: 14px;
+}
+.glyph.round {
+  width: 1.6rem;
+  padding: 0;
+  border-radius: 50%;
+}
+.glyph.round svg {
+  width: 1rem;
+  height: 1rem;
+}
+.glyph.xbtn {
+  background: rgba(255, 255, 255, 0.85);
+  color: #0b0e14;
+}
+.glyph.xbtn .icon {
+  width: 1rem;
+  height: 1rem;
+  stroke-width: 3;
+}

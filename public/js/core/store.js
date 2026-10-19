@@ -75,6 +75,10 @@ const DEFAULTS = {
   searchEngine: 'duckduckgo',
   browserProxy: true,
   homepage: 'xs://start',
+  vibration: true,
+  vibrationStrength: 0.7,
+  deadzone: 0.2,
+  cursorSpeed: 1,
 };
 
 let settings = { ...DEFAULTS, ...load('xs.settings', {}) };

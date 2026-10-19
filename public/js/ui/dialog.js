@@ -30,13 +30,14 @@ export function dialog({ title, text = [], iconName = null, code = null, actions
         a.label,
       ),
     );
+    const body = typeof content === 'function' ? content(close) : content;
     const box = h(
-      'div.dialog',
+      'div.dialog.scroll-y',
       { role: 'dialog', 'aria-modal': 'true', style: wide ? { width: 'min(56rem, 94vw)' } : undefined },
       iconName ? h('div.dlg-icon', icon(iconName)) : null,
       h('h2', title),
       ...[].concat(text).map((t) => h('p', t)),
-      content,
+      body,
       code ? h('div.code', code) : null,
       h('div.actions', { dataset: { group: '' } }, buttons),
     );

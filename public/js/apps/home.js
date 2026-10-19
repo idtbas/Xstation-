@@ -513,7 +513,9 @@ export function homeScreen() {
     activity: 'Startseite',
     hints: [
       ['accept', 'Auswählen'],
-      ['home', 'Control Center'],
+      ['menu', 'Optionen'],
+      ['y', 'Suche'],
+      ['cc', 'Control Center'],
       ['guide', 'Guide'],
     ],
     initialFocus: () => row.querySelector(`[data-id="${focusedId}"]`) || row.querySelector('.tile'),
@@ -570,6 +572,27 @@ export function homeScreen() {
     },
     destroy() {
       ambient.destroy();
+    },
+    onAction(action) {
+      if (action === 'lb' || action === 'rb') {
+        switchTab(action === 'lb' ? 'games' : 'media');
+        const tabBtn = action === 'lb' ? tabGames : tabMedia;
+        if (top.contains(nav.current)) nav.focus(tabBtn, { silent: true });
+        return true;
+      }
+      if (action === 'y') {
+        screens.go('search');
+        return true;
+      }
+      if (action === 'menu' || action === 'x') {
+        const tile = nav.current?.closest('.tile');
+        const item = tile ? rowItems().find((i) => i.id === tile.dataset.id) : null;
+        if (item && item.kind !== 'app') gameOptions(item);
+        else if (item) activate(item);
+        else return false;
+        return true;
+      }
+      return false;
     },
     onBack() {
       if (scroll.scrollTop > 10) {

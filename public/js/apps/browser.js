@@ -12,6 +12,10 @@ import { unlock, setActivity } from '../core/system.js';
 import { logoFull } from '../ui/logo.js';
 import { SPEED_DIAL, resolveInput } from '../data/sites.js';
 import { toggleControlCenter } from './overlays.js';
+import { dialog } from '../ui/dialog.js';
+import { rowBtn } from '../ui/components.js';
+import { toast } from '../ui/toast.js';
+import { openKeyboard, keyboardForInput } from '../ui/osk.js';
 
 const START = 'xs://start';
 let tabSeq = 0;
@@ -48,6 +52,119 @@ export function browserScreen({ url } = {}) {
   const top = h('div.br-top', { style: { position: 'relative' } }, tabStrip, bar, progress);
   const view = h('div.br-view');
   const frameNav = h('div.nav-frame.nav', { tabindex: '-1', 'aria-label': 'Webseite', dataset: { silent: '' } });
+
+  // Controller-Cursor (wie im Konsolen-Browser): linker Stick bewegt, A klickt
+  const cursor = h('div.br-cursor');
+  const cursorPos = { x: 0, y: 0, placed: false };
+  let lastHover = 0;
+  let hoverTimer = null;
+  let clickHintShown = false;
+
+  function cursorActive() {
+    return nav.current === frameNav && input.type === 'gamepad' && active && active.url !== START;
+  }
+
+  function syncCursor() {
+    const on = cursorActive();
+    input.stickMode = on ? 'cursor' : 'nav';
+    cursor.classList.toggle('show', on);
+    if (on && !cursorPos.placed) {
+      cursorPos.x = view.clientWidth / 2;
+      cursorPos.y = view.clientHeight / 2;
+      cursorPos.placed = true;
+      renderCursor();
+    }
+  }
+
+  function renderCursor() {
+    cursor.style.transform = `translate(${cursorPos.x}px, ${cursorPos.y}px)`;
+  }
+
+  function moveCursor({ x, y, mag, dt }) {
+    if (!cursorActive()) return;
+    const speed = (220 + 1500 * mag * mag) * (prefs.get('cursorSpeed') || 1);
+    const w = view.clientWidth;
+    const hgt = view.clientHeight;
+    let nx = cursorPos.x + x * speed * dt;
+    let ny = cursorPos.y + y * speed * dt;
+    // Am Rand weiterdrücken scrollt die Seite
+    if (ny < 4 && y < 0) scrollPage(y * speed * dt, false);
+    if (ny > hgt - 4 && y > 0) scrollPage(y * speed * dt, false);
+    cursorPos.x = Math.max(2, Math.min(w - 2, nx));
+    cursorPos.y = Math.max(2, Math.min(hgt - 2, ny));
+    renderCursor();
+    if (!useProxy()) return;
+    const now = performance.now();
+    const send = () => {
+      lastHover = performance.now();
+      post({ xs: 'hover', x: cursorPos.x, y: cursorPos.y });
+    };
+    clearTimeout(hoverTimer);
+    if (now - lastHover > 60) send();
+    else hoverTimer = setTimeout(send, 70); // letzte Position nachreichen
+  }
+
+  function post(msg) {
+    active?.frame?.contentWindow?.postMessage(msg, '*');
+  }
+
+  function cursorClick() {
+    cursor.classList.remove('click');
+    void cursor.offsetWidth;
+    cursor.classList.add('click');
+    play('select');
+    if (!useProxy()) {
+      if (!clickHintShown) {
+        clickHintShown = true;
+        toast({ title: 'Klicks per Controller nicht möglich', body: 'Im lokalen Modus ohne Proxy kann X-Station nicht in Webseiten klicken.', iconName: 'gamepad-2', force: true });
+      }
+      return;
+    }
+    post({ xs: 'click', x: cursorPos.x, y: cursorPos.y });
+  }
+
+  function switchTab(dir) {
+    if (tabs.length < 2) return;
+    const idx = tabs.indexOf(active);
+    setActive(tabs[(idx + dir + tabs.length) % tabs.length]);
+    play('move');
+  }
+
+  async function browserMenu() {
+    const items = [
+      ['new', 'plus', 'Neuer Tab'],
+      ['reload', 'rotate-cw', 'Neu laden'],
+      ['fwd', 'arrow-right', 'Vorwärts'],
+      ['home', 'house', 'Startseite'],
+      ['ext', 'external-link', 'Im neuen Fenster öffnen'],
+      ['closetab', 'x', 'Tab schließen'],
+      ['quit', 'log-out', 'Browser schließen'],
+    ];
+    const choice = await dialog({
+      title: 'Browser',
+      text: active && active.url !== START ? active.title : 'Neuer Tab',
+      content: (close) => h('div', { dataset: { group: '' } }, items.map(([value, ic, title]) => rowBtn({ iconName: ic, title, onClick: () => close(value) }))),
+      actions: [{ label: 'Abbrechen', value: null }],
+      initial: () => document.querySelector('.dialog .row-btn'),
+    });
+    if (choice === 'new') {
+      newTab();
+      focusAddress();
+    } else if (choice === 'reload') btnReload.click();
+    else if (choice === 'fwd') goHistory(1);
+    else if (choice === 'home') btnHome.click();
+    else if (choice === 'ext') btnExt.click();
+    else if (choice === 'closetab' && active) closeTab(active);
+    else if (choice === 'quit') screens.back();
+  }
+
+  function focusAddress() {
+    const target = active?.url === START ? active.dial?.querySelector('input') : urlInput;
+    if (!target) return;
+    nav.focus(target, { sound: true });
+    if (input.type === 'gamepad') keyboardForInput(target);
+    else target.focus();
+  }
 
   urlInput.addEventListener('focus', () => {
     urlBox.classList.add('focused-within');
@@ -99,8 +216,11 @@ export function browserScreen({ url } = {}) {
       t.frame?.classList.toggle('hidden', t !== tab || t.url === START);
       if (t.dial) t.dial.style.display = t === tab && t.url === START ? '' : 'none';
     }
+    frameNav.style.display = tab.url === START ? 'none' : '';
+    if (tab.url === START && nav.current === frameNav) nav.ensure();
     updateBar();
     renderTabs();
+    syncCursor();
   }
 
   function renderTabs() {
@@ -267,6 +387,41 @@ export function browserScreen({ url } = {}) {
     } else if (d.xs === 'open' && typeof d.url === 'string' && /^https?:/i.test(d.url)) {
       newTab(d.url);
       play('open');
+    } else if (d.xs === 'hover-info') {
+      cursor.classList.toggle('link', !!d.link);
+      cursor.classList.toggle('text', !!d.text);
+    } else if (d.xs === 'input-focus' && tab === active) {
+      openKeyboard({
+        value: String(d.value ?? ''),
+        label: String(d.label || 'Eingabe').slice(0, 80),
+        type: d.inputType === 'password' ? 'password' : d.inputType === 'url' || d.inputType === 'search' ? 'url' : 'text',
+        placeholder: String(d.placeholder || ''),
+        maxLength: Math.min(5000, Number(d.maxLength) || 2000),
+        onInput: (v) => post({ xs: 'set-value', value: v }),
+        submitLabel: 'Senden',
+      }).then(({ value, submitted }) => {
+        post({ xs: 'set-value', value });
+        if (submitted) post({ xs: 'submit' });
+        nav.focus(frameNav, { silent: true });
+        syncCursor();
+      });
+    } else if (d.xs === 'select' && tab === active && Array.isArray(d.options)) {
+      const options = d.options.slice(0, 200).map((text) => String(text).slice(0, 80) || '–');
+      dialog({
+        title: String(d.label || 'Auswahl').slice(0, 80),
+        content: (close) =>
+          h(
+            'div',
+            { dataset: { group: '' } },
+            options.map((text, i) => rowBtn({ iconName: i === d.index ? 'check' : 'circle', title: text, cls: i === d.index ? 'selected' : '', onClick: () => close(i) })),
+          ),
+        actions: [{ label: 'Abbrechen', value: null }],
+        cancelValue: null,
+        initial: () => document.querySelectorAll('.dialog .row-btn')[Math.max(0, d.index)] || null,
+      }).then((i) => {
+        if (i != null) post({ xs: 'set-select', index: i });
+        nav.focus(frameNav, { silent: true });
+      });
     } else if (d.xs === 'key') {
       if (d.key === 'Escape') {
         window.focus();
@@ -305,6 +460,7 @@ export function browserScreen({ url } = {}) {
     };
     return h(
       'div.speed-dial',
+      { dataset: { scroll: 'y' } },
       h('div.sd-logo', logoFull({ size: '3rem' })),
       box,
       h('div.sd-grid', { dataset: { group: '' } }, SPEED_DIAL.map((s) => tile(s.title, s.url, s.color))),
@@ -334,11 +490,14 @@ export function browserScreen({ url } = {}) {
   }
 
   // ---------- Steuerung per Controller: Seite scrollen ----------
-  function scrollPage(dy) {
-    active?.frame?.contentWindow?.postMessage({ xs: 'scroll', dy, smooth: true }, '*');
+  function scrollPage(dy, smooth = true) {
+    active?.frame?.contentWindow?.postMessage({ xs: 'scroll', dy, smooth }, '*');
   }
 
-  const el = h('div.app-screen.browser-screen', top, h('div', { style: { flex: '1', minHeight: '0', position: 'relative', display: 'flex' } }, view, frameNav));
+  frameNav.addEventListener('navfocus', syncCursor);
+  frameNav.addEventListener('navblur', () => requestAnimationFrame(syncCursor));
+
+  const el = h('div.app-screen.browser-screen', top, h('div', { style: { flex: '1', minHeight: '0', position: 'relative', display: 'flex' } }, view, frameNav, cursor));
   view.style.flex = '1';
 
   return {
@@ -348,7 +507,10 @@ export function browserScreen({ url } = {}) {
     hints: [
       ['accept', 'Auswählen'],
       ['back', 'Zurück'],
-      ['home', 'Control Center'],
+      ['y', 'Adresse'],
+      ['lb', 'Tab'],
+      ['rb', 'Tab'],
+      ['menu', 'Menü'],
     ],
     initialFocus: () => (active?.url === START ? active.dial?.querySelector('input') : urlInput),
     onShow() {
@@ -357,22 +519,51 @@ export function browserScreen({ url } = {}) {
       window.addEventListener('message', onMessage);
       unsubs.push(
         () => window.removeEventListener('message', onMessage),
-        bus.on('scroll', (dy) => scrollPage(dy)),
-        input.intercept((action) => {
+        bus.on('cursor', moveCursor),
+        bus.on('input-type', syncCursor),
+        input.intercept((action, source) => {
           if (nav.current !== frameNav) return false;
           if (active?.url === START) return false;
           if (action === 'down') return scrollPage(window.innerHeight * 0.35), true;
           if (action === 'up') return scrollPage(-window.innerHeight * 0.35), true;
+          if (action === 'left' || action === 'right') {
+            active?.frame?.contentWindow?.postMessage({ xs: 'scroll', dx: (action === 'right' ? 1 : -1) * window.innerWidth * 0.3, smooth: true }, '*');
+            return true;
+          }
           if (action === 'accept') {
-            active?.frame?.focus();
+            if (source === 'gamepad') cursorClick();
+            else active?.frame?.focus();
+            return true;
+          }
+          if (action === 'back' && source === 'gamepad') {
+            if (active.index > 0) {
+              goHistory(-1);
+              play('back');
+            } else nav.focus(urlInput, { sound: true });
             return true;
           }
           return false;
         }),
       );
+      syncCursor();
     },
     onHide() {
       unsubs.splice(0).forEach((u) => u());
+      input.stickMode = 'nav';
+    },
+    onAction(action) {
+      if (action === 'y') focusAddress();
+      else if (action === 'lb') switchTab(-1);
+      else if (action === 'rb') switchTab(1);
+      else if (action === 'menu') browserMenu();
+      else if ((action === 'lt' || action === 'rt') && active?.url !== START) scrollPage((action === 'rt' ? 1 : -1) * view.clientHeight * 0.85);
+      else return false;
+      return true;
+    },
+    onScroll(dx, dy) {
+      if (!active || active.url === START) return false;
+      active.frame?.contentWindow?.postMessage({ xs: 'scroll', dx, dy, smooth: false }, '*');
+      return true;
     },
     onReopen({ url: u } = {}) {
       if (u) newTab(u);

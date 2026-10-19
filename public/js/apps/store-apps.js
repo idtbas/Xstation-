@@ -203,6 +203,21 @@ export function libraryScreen() {
   return {
     el,
     recent: { title: 'Spielebibliothek', icon: 'layout-grid' },
+    hints: [
+      ['accept', 'Spielen'],
+      ['back', 'Zurück'],
+      ['lb', 'Reiter'],
+      ['rb', 'Reiter'],
+    ],
+    onAction(action) {
+      if (action !== 'lb' && action !== 'rb') return false;
+      const idx = tabBtns.findIndex(([, id]) => id === tab);
+      const [btn] = tabBtns[(idx + (action === 'rb' ? 1 : tabBtns.length - 1)) % tabBtns.length];
+      btn.click();
+      const first = grid.querySelector('.nav');
+      if (first) nav.focus(first, { silent: true });
+      return true;
+    },
     initialFocus: () => grid.querySelector('.nav') || tInstalled,
     onShow() {
       setActivity('In der Spielebibliothek');

@@ -212,7 +212,7 @@ export const nav = {
     const el = this.current;
     if (!el || !visible(el)) return;
     if (/^(INPUT|TEXTAREA)$/.test(el.tagName)) {
-      el.focus();
+      bus.emit('text-activate', el);
       return;
     }
     if (!el.hasAttribute('data-silent')) play('select');

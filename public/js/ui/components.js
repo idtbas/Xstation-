@@ -33,13 +33,20 @@ export function toggleRow({ iconName, title, sub, get, set, key }) {
 }
 
 // Regler: Links/Rechts ändert den Wert, solange er fokussiert ist.
-export function slider({ iconName, value, min = 0, max = 1, step = 0.05, format = (v) => `${Math.round(v * 100)}`, onChange, key }) {
+export function slider({ iconName, title, sub, value, min = 0, max = 1, step = 0.05, format = (v) => `${Math.round(v * 100)}`, onChange, key }) {
   let current = value;
   const fill = h('div.fill');
   const knob = h('div.knob');
   const val = h('span.val');
   const track = h('div.track', fill, knob);
-  const el = h('div.slider.nav', { tabindex: '-1', role: 'slider', dataset: key ? { key } : undefined }, iconName ? icon(iconName) : null, track, val);
+  const el = h(
+    'div.slider.nav',
+    { tabindex: '-1', role: 'slider', 'aria-label': title || undefined, dataset: key ? { key } : undefined },
+    iconName ? icon(iconName) : null,
+    title ? h('span.sl-title', title, sub ? h('small', sub) : null) : null,
+    track,
+    val,
+  );
 
   function render() {
     const pct = ((current - min) / (max - min)) * 100;
@@ -49,7 +56,7 @@ export function slider({ iconName, value, min = 0, max = 1, step = 0.05, format 
     el.setAttribute('aria-valuenow', String(current));
   }
   function setValue(v) {
-    const next = Math.min(max, Math.max(min, Math.round(v / step) * step));
+    const next = Math.min(max, Math.max(min, +(Math.round((v - min) / step) * step + min).toFixed(4)));
     if (next === current) return;
     current = next;
     render();

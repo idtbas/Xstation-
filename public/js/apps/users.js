@@ -112,10 +112,12 @@ export function usersScreen() {
     initialFocus: () => cards[0] || addCard,
     onBack: () => true,
     onAction(action) {
-      if (action === 'x' && nav.current?.dataset.accountId) {
+      if ((action === 'x' || action === 'menu') && nav.current?.dataset.accountId) {
         const acc = list.find((a) => a.id === nav.current.dataset.accountId);
         if (acc) removeAccount(acc);
+        return true;
       }
+      return false;
     },
   };
 }

@@ -19,6 +19,8 @@ import { TERMS_VERSION, TERMS_DATE, DISCLAIMER, CREDITS } from '../data/legal.js
 import { GAMES } from '../data/games.js';
 import { SEARCH_ENGINES } from '../data/sites.js';
 import { signOut, restart } from './flow.js';
+import { openPadTest } from '../ui/padtest.js';
+import { rumble, canTriggerRumble } from '../core/haptics.js';
 
 const SECTIONS = [
   { id: 'account', title: 'Konto & Profil', icon: 'user-round', desc: 'Verwalte dein X-Station-Konto, dein Profil und deine Anmeldung.' },
@@ -27,7 +29,7 @@ const SECTIONS = [
   { id: 'notifications', title: 'Benachrichtigungen', icon: 'bell', desc: 'Lege fest, wie X-Station dich über Neuigkeiten informiert.' },
   { id: 'access', title: 'Barrierefreiheit', icon: 'accessibility', desc: 'Bewegungen reduzieren und Text vergrößern.' },
   { id: 'browser', title: 'Browser', icon: 'globe', desc: 'Suchmaschine, Startseite und Datenschutz des eingebauten Browsers.' },
-  { id: 'controls', title: 'Steuerung', icon: 'gamepad-2', desc: 'X-Station lässt sich mit Tastatur, Maus und Controller bedienen.' },
+  { id: 'controls', title: 'Controller & Steuerung', icon: 'gamepad-2', desc: 'Volle Unterstützung für Xbox-Controller (Xbox Series X|S, Xbox One, Elite, Xbox 360) – außerdem Tastatur, Maus und PlayStation-Controller.' },
   { id: 'system', title: 'System', icon: 'cpu', desc: 'Speicher, Verbindung und Zurücksetzen.' },
   { id: 'info', title: 'Info', icon: 'info', desc: 'Systeminformationen, rechtliche Hinweise und Credits.' },
 ];
@@ -250,26 +252,79 @@ export function settingsScreen({ section = 'account' } = {}) {
     },
 
     controls() {
-      const rows = [
-        ['Bewegen', 'Pfeiltasten / WASD', 'Steuerkreuz / L-Stick', 'Steuerkreuz / L-Stick'],
-        ['Auswählen', 'Enter / Leertaste', 'A', '✕'],
-        ['Zurück', 'Esc / Rücktaste', 'B', '○'],
-        ['Control Center', 'C / Pos1 / F1', 'Xbox-Taste', 'PS-Taste'],
-        ['Guide', 'G / F2', 'Ansicht-Taste', 'Create-Taste'],
-        ['Guide-Tabs', 'Q / E', 'LB / RB', 'L1 / R1'],
-        ['Seite scrollen (Browser)', 'Mausrad', 'R-Stick', 'R-Stick'],
+      const pad = input.pads()[0];
+      const typeLabel = { xbox: 'Xbox-Layout', playstation: 'PlayStation-Layout', generic: 'Standard-Layout' };
+      const XBOX_MAP = [
+        ['A', 'Auswählen'],
+        ['B', 'Zurück'],
+        ['X', 'Kontextaktion · Löschen in der Tastatur · Play/Pause in Musik'],
+        ['Y', 'Suche · Adressleiste im Browser · Leerzeichen in der Tastatur'],
+        ['LB / RB', 'Reiter wechseln (Startseite, Guide, Browser-Tabs, Einstellungen)'],
+        ['LT / RT', 'Seitenweise scrollen · Umschalt/Symbole in der Tastatur'],
+        ['View', 'Control Center · gedrückt halten: Guide'],
+        ['Menu', 'Optionen zum ausgewählten Element · Fertig in der Tastatur'],
+        ['Xbox-Taste', 'Guide · gedrückt halten: Ein/Aus-Optionen'],
+        ['Share', 'Control Center'],
+        ['Linker Stick', 'Fokus bewegen · Cursor im Browser'],
+        ['Rechter Stick', 'Stufenlos scrollen (überall)'],
+        ['Stick drücken (LS)', 'Umschalt in der Tastatur'],
+        ['Steuerkreuz', 'Fokus bewegen · im Browser scrollen'],
+      ];
+      const KEY_ROWS = [
+        ['Bewegen', 'Pfeiltasten / WASD'],
+        ['Auswählen', 'Enter / Leertaste'],
+        ['Zurück', 'Esc / Rücktaste'],
+        ['Control Center', 'C / Pos1 / F1'],
+        ['Guide', 'G / F2'],
+        ['Reiter wechseln', 'Q / E'],
+        ['Seitenweise scrollen', 'Bild ↑ / Bild ↓'],
+        ['Optionen', 'M'],
       ];
       return [
-        h(
-          'div.set-group.focus-block.nav',
-          { tabindex: '-1', dataset: { key: 'keys' } },
-          label('Tastenbelegung'),
-          h('div.key-table', h('b', 'Aktion'), h('b', 'Tastatur'), h('b', 'Xbox-Controller'), h('b', 'PS-Controller'), rows.flat().map((c) => h('span', c))),
+        group(
+          'Controller',
+          rowBtn({
+            iconName: 'gamepad-2',
+            title: pad ? pad.name : 'Kein Controller verbunden',
+            sub: pad
+              ? `${typeLabel[pad.type]} · Zuordnung: ${pad.layout} · ${pad.actuator ? (canTriggerRumble(pad.index) ? 'Vibration & Trigger-Vibration' : 'Vibration') : 'ohne Vibration'}`
+              : 'Verbinde einen Xbox-Controller per USB, Xbox Wireless Adapter oder Bluetooth und drücke eine Taste.',
+            key: 'pad',
+          }),
+          rowBtn({ iconName: 'activity', title: 'Controller testen', sub: 'Alle Tasten, Sticks und Trigger live prüfen', key: 'padtest', onClick: () => openPadTest() }),
         ),
         group(
-          'Status',
-          rowBtn({ iconName: 'gamepad-2', title: 'Controller', sub: input.padType !== 'generic' || navigator.getGamepads?.().some(Boolean) ? `Erkannt: ${input.padType === 'playstation' ? 'PlayStation-Layout' : input.padType === 'xbox' ? 'Xbox-Layout' : 'Standard-Layout'}` : 'Kein Controller verbunden – drücke eine Taste am Controller', key: 'pad' }),
-          rowBtn({ iconName: 'keyboard', title: 'Aktuelle Eingabe', sub: { mouse: 'Maus / Touch', keyboard: 'Tastatur', gamepad: 'Controller' }[input.type], key: 'inp' }),
+          'Vibration',
+          toggleRow({ iconName: 'zap', title: 'Vibration', sub: 'Bei Auswahl, Benachrichtigungen, Erfolgen und Spielstarts – inkl. Trigger-Vibration', get: () => prefs.get('vibration'), set: (v) => prefs.set('vibration', v), key: 'vib' }),
+          slider({ title: 'Stärke', value: prefs.get('vibrationStrength'), min: 0.1, max: 1, step: 0.1, onChange: (v) => prefs.set('vibrationStrength', v), key: 'vibstr' }),
+          rowBtn({
+            iconName: 'play',
+            title: 'Vibration testen',
+            key: 'vibtest',
+            onClick: () => {
+              const p = input.pads()[0];
+              if (p) rumble('test', { force: true, index: p.index });
+              else toast({ title: 'Kein Controller verbunden', iconName: 'gamepad-2', force: true });
+            },
+          }),
+        ),
+        group(
+          'Sticks',
+          slider({ title: 'Totzone', sub: 'Ignoriert kleine Stick-Bewegungen', value: prefs.get('deadzone'), min: 0.08, max: 0.5, step: 0.02, onChange: (v) => prefs.set('deadzone', v), key: 'dz' }),
+          slider({ title: 'Cursor-Tempo', sub: 'Zeiger im Browser', value: prefs.get('cursorSpeed'), min: 0.4, max: 2, step: 0.1, format: (v) => `${v.toFixed(1)}×`, onChange: (v) => prefs.set('cursorSpeed', v), key: 'cursor' }),
+        ),
+        h(
+          'div.set-group.focus-block.nav',
+          { tabindex: '-1', dataset: { key: 'xboxmap' } },
+          label('Xbox-Controller – Tastenbelegung'),
+          h('div.map-table', XBOX_MAP.map(([k, v]) => [h('span.k', k), h('span', v)])),
+          h('p', { style: { color: 'var(--text-3)', padding: '0.75rem 1rem 0', margin: 0, lineHeight: 1.5 } }, 'Tipp: Öffnet die Xbox-Taste unter Windows die Xbox Game Bar, erreichst du den Guide auch, indem du View gedrückt hältst. Controller funktionieren nur über HTTPS oder localhost.'),
+        ),
+        h(
+          'div.set-group.focus-block.nav',
+          { tabindex: '-1', dataset: { key: 'keymap' } },
+          label('Tastatur'),
+          h('div.map-table', KEY_ROWS.map(([k, v]) => [h('span.k', k), h('span', v)])),
         ),
       ];
     },
@@ -487,17 +542,33 @@ export function settingsScreen({ section = 'account' } = {}) {
     el,
     activity: 'In den Einstellungen',
     recent: { title: 'Einstellungen', icon: 'settings' },
+    hints: [
+      ['accept', 'Auswählen'],
+      ['back', 'Zurück'],
+      ['lb', 'Bereich'],
+      ['rb', 'Bereich'],
+    ],
     initialFocus: () => navRows.find((r) => r.dataset.section === current),
     onShow() {
       setActivity('In den Einstellungen');
       show(current, true);
       unsubs.push(
         store.on('user', () => current === 'account' && show('account', true)),
-        bus.on('input-type', () => current === 'controls' && show('controls', true)),
+        bus.on('gamepad', () => current === 'controls' && show('controls', true)),
       );
     },
     onHide() {
       unsubs.splice(0).forEach((u) => u());
+    },
+    onAction(action) {
+      if (action !== 'lb' && action !== 'rb') return false;
+      const idx = SECTIONS.findIndex((x) => x.id === current);
+      const next = SECTIONS[(idx + (action === 'rb' ? 1 : SECTIONS.length - 1)) % SECTIONS.length];
+      show(next.id);
+      const row = navRows.find((r) => r.dataset.section === next.id);
+      if (row && navEl.contains(nav.current)) nav.focus(row, { silent: true });
+      play('move');
+      return true;
     },
     onReopen({ section: s } = {}) {
       if (s) {

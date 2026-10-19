@@ -1,7 +1,8 @@
 // X-Station – Einstiegspunkt
 
 import { applyPrefs, bus, pushRecent } from './core/store.js';
-import { initInput } from './core/input.js';
+import { initInput, input } from './core/input.js';
+import { nav } from './core/focus.js';
 import { screens } from './core/screens.js';
 import { api } from './core/api.js';
 import { initHints } from './ui/hints.js';
@@ -13,13 +14,31 @@ import { termsScreen } from './apps/terms.js';
 import { usersScreen, loginScreen, registerScreen } from './apps/users.js';
 import { afterBoot, signOut } from './apps/flow.js';
 import { registerApps } from './apps/registry.js';
-import { toggleControlCenter, toggleGuide } from './apps/overlays.js';
+import { toggleControlCenter, toggleGuide, openControlCenter } from './apps/overlays.js';
+import { keyboardForInput } from './ui/osk.js';
 import { logoMark } from './ui/logo.js';
+import { isMobileDevice, renderDesktopOnly } from './core/device.js';
 
 const SYSTEM_SCREENS = ['power', 'boot', 'terms', 'users', 'login', 'register', 'rest'];
 
+function scrollerForFocus() {
+  const cur = nav.current;
+  const root = nav.top()?.root;
+  return cur?.closest('.scroll-y, .home-scroll, [data-scroll]') || root?.querySelector('.scroll-y, .home-scroll') || null;
+}
+
+function pageScroll(dir) {
+  const s = scrollerForFocus();
+  s?.scrollBy({ top: dir * s.clientHeight * 0.8, behavior: 'smooth' });
+}
+
 async function main() {
   applyPrefs();
+  if (isMobileDevice()) {
+    document.getElementById('app').replaceChildren();
+    renderDesktopOnly(document.getElementById('app'));
+    return;
+  }
   initInput();
   const overlays = document.getElementById('overlays');
   initHints(document.getElementById('hints'));
@@ -35,11 +54,41 @@ async function main() {
   screens.register('register', registerScreen);
   registerApps(screens);
 
-  bus.on('action', (action) => {
-    const inSession = !SYSTEM_SCREENS.includes(screens.current()?.name);
-    if (action === 'home' && inSession) return toggleControlCenter();
-    if (action === 'guide' && inSession) return toggleGuide();
-    screens.current()?.instance.onAction?.(action);
+  bus.on('action', ({ action, source }) => {
+    const cur = screens.current();
+    const inSession = cur && !SYSTEM_SCREENS.includes(cur.name);
+    if (action === 'cc') return inSession && toggleControlCenter();
+    if (action === 'guide') return inSession && toggleGuide();
+    if (action === 'power') return inSession && openControlCenter({ pop: 'power' });
+    // Bildschirm-Aktionen nur, wenn kein Overlay (Guide, Dialog …) darüber liegt
+    if (cur && nav.top() === cur.layer && cur.instance.onAction?.(action, source)) return;
+    if (action === 'lt' || action === 'rt') pageScroll(action === 'rt' ? 1 : -1);
+  });
+
+  // Rechter Stick / LT / RT: den Bereich unter dem Fokus scrollen
+  bus.on('scroll', ({ dx, dy }) => {
+    const cur = screens.current();
+    if (cur && nav.top() === cur.layer && cur.instance.onScroll?.(dx, dy)) return;
+    scrollerForFocus()?.scrollBy({ top: dy, behavior: 'instant' });
+  });
+
+  // Textfelder: mit dem Controller öffnet sich die Bildschirmtastatur
+  bus.on('text-activate', (el) => {
+    if (input.type === 'gamepad') keyboardForInput(el);
+    else el.focus();
+  });
+
+  bus.on('gamepad', (pad) => {
+    if (pad.connected) {
+      toast({
+        title: `${pad.name} verbunden`,
+        body: pad.type === 'playstation' ? 'PS-Taste: Control Center · Create: Guide' : 'View: Control Center · Xbox-Taste: Guide · Menu: Optionen',
+        iconName: 'gamepad-2',
+        force: true,
+      });
+    } else {
+      toast({ title: `${pad.name} getrennt`, iconName: 'gamepad-2', force: true, sound: 'back' });
+    }
   });
 
   // X-Station-Taste für Maus/Touch: Klick = Control Center, Rechtsklick = Guide

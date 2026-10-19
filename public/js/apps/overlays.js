@@ -50,6 +50,15 @@ export function toggleControlCenter() {
   openControlCenter();
 }
 
+export function openControlCenter({ pop = null } = {}) {
+  if (guide) guide.close(true);
+  if (cc) {
+    if (pop) cc.openPopById(pop);
+    return;
+  }
+  createControlCenter({ pop });
+}
+
 export function toggleGuide() {
   if (guide) return guide.close();
   openGuide({});
@@ -65,7 +74,7 @@ export function openGuide(opts = {}) {
 // ======================================================================
 // Control Center
 // ======================================================================
-function openControlCenter() {
+function createControlCenter({ pop: initialPop = null } = {}) {
   play('open');
   markSeen('cc');
   const unsubs = [];
@@ -316,9 +325,14 @@ function openControlCenter() {
   setHints([
     ['accept', 'Auswählen'],
     ['back', 'Schließen'],
-    ['home', 'Schließen'],
+    ['cc', 'Schließen'],
   ]);
-  cc = { close };
+  function openPopById(id) {
+    const idx = icons.findIndex((it) => it.id === id);
+    if (idx >= 0 && icons[idx].pop) openPop(icons[idx].pop, iconEls[idx]);
+  }
+  cc = { close, openPopById };
+  if (initialPop) requestAnimationFrame(() => openPopById(initialPop));
 }
 
 function notificationRow(n, onClick) {

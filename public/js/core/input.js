@@ -1,8 +1,15 @@
-// Eingabe: Tastatur, Gamepad (Standard-Mapping) und Maus → Konsolen-Aktionen.
+// Eingabe: Tastatur, Maus und Controller (vollständige Xbox-Unterstützung) → Konsolen-Aktionen.
+//
+// Aktionen: up/down/left/right, accept, back, x, y, lb, rb, lt, rt, ls, rs, menu,
+//           cc (Control Center), guide, power
+// Analoge Ereignisse (über den Bus): 'scroll' {dx, dy} vom rechten Stick,
+//                                    'cursor' {x, y, dt} vom linken Stick im Cursor-Modus.
 
 import { nav } from './focus.js';
-import { bus } from './store.js';
+import { bus, prefs } from './store.js';
 import { unlockAudio, play } from './sound.js';
+import { setActivePad } from './haptics.js';
+import { BTN, normalizePad, applyDeadzone, buttonActions, padName } from './gamepad-map.js';
 
 const KEYMAP = {
   ArrowUp: 'up',
@@ -13,29 +20,18 @@ const KEYMAP = {
   ' ': 'accept',
   Escape: 'back',
   Backspace: 'back',
-  Home: 'home',
-  F1: 'home',
+  Home: 'cc',
+  F1: 'cc',
   F2: 'guide',
+  PageUp: 'lt',
+  PageDown: 'rt',
+  ContextMenu: 'menu',
 };
-const LETTER_MAP = { w: 'up', s: 'down', a: 'left', d: 'right', c: 'home', g: 'guide', q: 'lb', e: 'rb', x: 'x', y: 'y', m: 'menu' };
-
-const PAD_BUTTONS = {
-  0: 'accept',
-  1: 'back',
-  2: 'x',
-  3: 'y',
-  4: 'lb',
-  5: 'rb',
-  8: 'guide',
-  9: 'menu',
-  12: 'up',
-  13: 'down',
-  14: 'left',
-  15: 'right',
-  16: 'home',
-};
+const LETTER_MAP = { w: 'up', s: 'down', a: 'left', d: 'right', c: 'cc', g: 'guide', q: 'lb', e: 'rb', x: 'x', y: 'y', m: 'menu' };
 
 const DIRS = new Set(['up', 'down', 'left', 'right']);
+const HOLD_MS = 550;
+const REPEAT_DELAY = 360;
 let lastDirAt = 0;
 let enabled = true;
 const handlers = [];
@@ -43,13 +39,22 @@ const handlers = [];
 export const input = {
   type: 'mouse',
   padType: 'generic',
-  // Eigene Handler (z. B. Overlays) – geben true zurück, wenn sie die Aktion verarbeitet haben.
+  padName: null,
+  // 'nav' = linker Stick bewegt den Fokus, 'cursor' = linker Stick steuert einen Zeiger (Browser)
+  stickMode: 'nav',
+  // Eigene Handler (Overlays, Tastatur, Tests) – geben true zurück, wenn sie die Aktion verarbeitet haben.
   intercept(fn) {
     handlers.push(fn);
-    return () => handlers.splice(handlers.indexOf(fn), 1);
+    return () => {
+      const i = handlers.indexOf(fn);
+      if (i >= 0) handlers.splice(i, 1);
+    };
   },
   setEnabled(v) {
     enabled = v;
+  },
+  pads() {
+    return readPads();
   },
 };
 
@@ -57,6 +62,7 @@ function setInputType(type) {
   if (input.type === type) return;
   input.type = type;
   document.body.dataset.input = type;
+  if (type !== 'gamepad') setActivePad(null);
   bus.emit('input-type', type);
 }
 
@@ -69,13 +75,14 @@ export function dispatch(action, source = 'keyboard') {
   }
   if (action === 'accept') nav.activate();
   else if (action === 'back') nav.back();
-  else bus.emit('action', action);
+  else bus.emit('action', { action, source });
 }
 
 function isTextField(el) {
   return el && (el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && !['checkbox', 'radio', 'range', 'button'].includes(el.type)));
 }
 
+// ---------- Tastatur ----------
 function onKeyDown(ev) {
   unlockAudio();
   if (ev.ctrlKey || ev.metaKey || ev.altKey) return;
@@ -93,7 +100,7 @@ function onKeyDown(ev) {
   }
 
   if (typing) {
-    if (action === 'left' || action === 'right' || action === 'accept' && ev.key === ' ' || action === 'back' && ev.key === 'Backspace') {
+    if (action === 'left' || action === 'right' || (action === 'accept' && ev.key === ' ') || (action === 'back' && ev.key === 'Backspace')) {
       return; // Cursor/Tippen im Textfeld
     }
     if (action === 'accept') {
@@ -127,76 +134,116 @@ function onKeyDown(ev) {
   dispatch(action, 'keyboard');
 }
 
-// ---------- Gamepad ----------
+// ---------- Controller ----------
 const padState = new Map();
+let lastFrame = performance.now();
 
-function detectPad(id) {
-  const s = id.toLowerCase();
-  if (s.includes('054c') || s.includes('dualsense') || s.includes('dualshock') || s.includes('wireless controller') || s.includes('playstation')) {
-    return 'playstation';
+export function readPads() {
+  const raw = navigator.getGamepads ? navigator.getGamepads() : [];
+  const out = [];
+  for (const p of raw) {
+    const n = normalizePad(p);
+    if (n) out.push(n);
   }
-  if (s.includes('045e') || s.includes('xbox') || s.includes('xinput')) return 'xbox';
-  return 'generic';
+  return out;
+}
+
+function activatePad(pad) {
+  setActivePad(pad.index);
+  if (input.padType !== pad.type || input.padName !== pad.name) {
+    input.padType = pad.type;
+    input.padName = pad.name;
+    document.body.dataset.pad = pad.type;
+    bus.emit('input-type', 'gamepad');
+  }
+  setInputType('gamepad');
 }
 
 function pollPads(now) {
-  const pads = navigator.getGamepads ? navigator.getGamepads() : [];
-  for (const pad of pads) {
-    if (!pad || pad.mapping !== 'standard') continue;
+  const dt = Math.min(0.05, (now - lastFrame) / 1000);
+  lastFrame = now;
+  const deadzone = Math.max(0.08, Math.min(0.6, prefs.get('deadzone') ?? 0.2));
+
+  for (const pad of readPads()) {
     let st = padState.get(pad.index);
     if (!st) {
-      st = { buttons: [], dir: null, dirSince: 0, dirLast: 0 };
+      st = { pressed: [], since: [], held: [], lastRepeat: [], dir: null, dirSince: 0, dirLast: 0 };
       padState.set(pad.index, st);
     }
+    const map = buttonActions(pad.type);
+
     pad.buttons.forEach((b, i) => {
-      const pressed = b.pressed || b.value > 0.6;
-      const was = st.buttons[i];
-      st.buttons[i] = pressed;
+      if (i >= BTN.UP && i <= BTN.RIGHT) return; // Steuerkreuz: siehe Richtungslogik
+      const pressed = b.pressed;
+      const was = st.pressed[i];
+      st.pressed[i] = pressed;
+      const m = map[i];
+      if (!m) return;
       if (pressed && !was) {
-        const action = PAD_BUTTONS[i];
-        if (!action) return;
         unlockAudio();
-        const type = detectPad(pad.id);
-        if (input.padType !== type) {
-          input.padType = type;
-          document.body.dataset.pad = type;
-          bus.emit('input-type', 'gamepad');
+        activatePad(pad);
+        st.since[i] = now;
+        st.held[i] = false;
+        st.lastRepeat[i] = now;
+        // Tasten mit Halten-Funktion lösen erst beim Loslassen (oder nach Haltezeit) aus
+        if (!m.hold) dispatch(m.tap, 'gamepad');
+      } else if (pressed && was) {
+        if (m.hold && !st.held[i] && now - st.since[i] >= HOLD_MS) {
+          st.held[i] = true;
+          dispatch(m.hold, 'gamepad');
+        } else if (m.repeat && now - st.since[i] > REPEAT_DELAY && now - st.lastRepeat[i] > 140) {
+          st.lastRepeat[i] = now;
+          dispatch(m.tap, 'gamepad');
         }
-        setInputType('gamepad');
-        if (!DIRS.has(action)) dispatch(action, 'gamepad');
+      } else if (!pressed && was) {
+        if (m.hold && !st.held[i]) dispatch(m.tap, 'gamepad');
       }
     });
 
-    // Richtung aus Steuerkreuz oder linkem Stick, mit Wiederholung beim Halten
-    const [ax, ay] = pad.axes;
+    // Linker Stick
+    const [lx, ly, lmag] = applyDeadzone(pad.axes[0], pad.axes[1], deadzone);
+    if (input.stickMode === 'cursor' && lmag > 0) {
+      activatePad(pad);
+      bus.emit('cursor', { x: lx, y: ly, mag: lmag, dt });
+    }
+
+    // Richtung aus Steuerkreuz oder (im Navigationsmodus) linkem Stick, mit Wiederholung beim Halten
     let dir = null;
-    if (st.buttons[12]) dir = 'up';
-    else if (st.buttons[13]) dir = 'down';
-    else if (st.buttons[14]) dir = 'left';
-    else if (st.buttons[15]) dir = 'right';
-    else if (Math.abs(ax) > 0.55 || Math.abs(ay) > 0.55) {
-      dir = Math.abs(ax) > Math.abs(ay) ? (ax > 0 ? 'right' : 'left') : ay > 0 ? 'down' : 'up';
+    const b = pad.buttons;
+    if (b[BTN.UP].pressed) dir = 'up';
+    else if (b[BTN.DOWN].pressed) dir = 'down';
+    else if (b[BTN.LEFT].pressed) dir = 'left';
+    else if (b[BTN.RIGHT].pressed) dir = 'right';
+    else if (input.stickMode === 'nav' && lmag > 0.45) {
+      dir = Math.abs(lx) > Math.abs(ly) ? (lx > 0 ? 'right' : 'left') : ly > 0 ? 'down' : 'up';
     }
     if (dir !== st.dir) {
       st.dir = dir;
       st.dirSince = now;
       st.dirLast = now;
       if (dir) {
-        setInputType('gamepad');
+        unlockAudio();
+        activatePad(pad);
         dispatch(dir, 'gamepad');
       }
     } else if (dir) {
       const held = now - st.dirSince;
       const interval = held > 1400 ? 60 : 110;
-      if (held > 360 && now - st.dirLast > interval) {
+      if (held > REPEAT_DELAY && now - st.dirLast > interval) {
         st.dirLast = now;
         dispatch(dir, 'gamepad');
       }
     }
 
-    // Rechter Stick scrollt (z. B. im Browser)
-    const ry = pad.axes[3] || 0;
-    if (Math.abs(ry) > 0.25) bus.emit('scroll', ry * 26);
+    // Rechter Stick: analoges Scrollen (beschleunigt bei Vollausschlag)
+    const [rx, ry, rmag] = applyDeadzone(pad.axes[2], pad.axes[3], deadzone);
+    if (rmag > 0) {
+      activatePad(pad);
+      const speed = 300 + 2400 * rmag * rmag;
+      bus.emit('scroll', { dx: rx * speed * dt, dy: ry * speed * dt });
+    }
+
+    input.analog = { lt: pad.buttons[BTN.LT].value, rt: pad.buttons[BTN.RT].value };
   }
   requestAnimationFrame(pollPads);
 }
@@ -212,7 +259,7 @@ export function initInput() {
   window.addEventListener(
     'pointermove',
     (ev) => {
-      if (ev.pointerType === 'mouse' && (Math.abs(ev.movementX) + Math.abs(ev.movementY) > 2)) setInputType('mouse');
+      if (ev.pointerType === 'mouse' && Math.abs(ev.movementX) + Math.abs(ev.movementY) > 2) setInputType('mouse');
       if (input.type !== 'mouse') return;
       const el = ev.target.closest?.('.nav');
       if (el) nav.hover(el);
@@ -224,10 +271,17 @@ export function initInput() {
     if (el.classList?.contains('nav') && nav.current !== el) nav.hover(el);
   });
   window.addEventListener('gamepadconnected', (ev) => {
-    input.padType = detectPad(ev.gamepad.id);
-    document.body.dataset.pad = input.padType;
-    bus.emit('gamepad', { connected: true, type: input.padType, id: ev.gamepad.id });
+    const pad = normalizePad(ev.gamepad);
+    if (!pad) return;
+    input.padType = pad.type;
+    input.padName = pad.name;
+    document.body.dataset.pad = pad.type;
+    bus.emit('gamepad', { connected: true, ...pad });
   });
-  window.addEventListener('gamepaddisconnected', () => bus.emit('gamepad', { connected: false }));
+  window.addEventListener('gamepaddisconnected', (ev) => {
+    padState.delete(ev.gamepad.index);
+    bus.emit('gamepad', { connected: false, name: padName(ev.gamepad.id) });
+    if (!readPads().length && input.type === 'gamepad') setInputType('mouse');
+  });
   requestAnimationFrame(pollPads);
 }

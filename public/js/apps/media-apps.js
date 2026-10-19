@@ -94,6 +94,20 @@ export function musicScreen() {
   return {
     el,
     recent: { title: 'Musik', icon: 'disc-3' },
+    hints: [
+      ['accept', 'Auswählen'],
+      ['x', 'Play/Pause'],
+      ['lb', 'Vorheriger'],
+      ['rb', 'Nächster'],
+      ['back', 'Zurück'],
+    ],
+    onAction(action) {
+      if (action === 'x') music.toggle();
+      else if (action === 'lb') music.prev();
+      else if (action === 'rb') music.next();
+      else return false;
+      return true;
+    },
     initialFocus: () => playBtn,
     onShow() {
       audioContext();
