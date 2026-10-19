@@ -23,7 +23,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  padding: 0 4.5rem 2rem;
+  padding: 0 4.5rem 4.25rem;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -49,6 +49,9 @@
   border: 1px solid var(--line);
   box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.5);
   animation: cc-rise 560ms var(--ease-out) both;
+}
+.cc-card.plain {
+  background: linear-gradient(135deg, rgba(10, 108, 255, 0.28), rgba(16, 163, 16, 0.22)), rgba(30, 35, 46, 0.9);
 }
 .cc-card .cc-art {
   position: absolute;

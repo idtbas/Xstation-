@@ -11,9 +11,8 @@
   "scripts": {
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
-    "test": "node --test test/",
-    "icons": "node scripts/build-icons.mjs",
-    "screenshots": "node scripts/screenshots.mjs"
+    "test": "node --test test/*.test.js",
+    "icons": "node scripts/build-icons.mjs"
   },
   "devDependencies": {
     "lucide-static": "^1.59.0"

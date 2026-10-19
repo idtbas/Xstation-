@@ -14,7 +14,7 @@ export class Ambient {
     this.resize = this.resize.bind(this);
     this.frame = this.frame.bind(this);
     window.addEventListener('resize', this.resize);
-    bus.on('prefs', ({ key }) => {
+    this.offPrefs = bus.on('prefs', ({ key }) => {
       if (key === 'particles' || key === 'reduceMotion') this.sync();
     });
     this.resize();
@@ -60,6 +60,12 @@ export class Ambient {
         color: '#ffffff',
       });
     }
+  }
+
+  destroy() {
+    this.stop();
+    window.removeEventListener('resize', this.resize);
+    this.offPrefs?.();
   }
 
   enabled() {

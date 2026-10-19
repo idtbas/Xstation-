@@ -1,0 +1,16 @@
+# Render-Blueprint: https://render.com → „New +“ → „Blueprint“ → dieses Repository wählen.
+services:
+  - type: web
+    name: x-station
+    runtime: node
+    plan: free
+    buildCommand: npm install --omit=dev
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: TRUST_PROXY
+        value: "1"
+      - key: XSTATION_SECRET
+        generateValue: true

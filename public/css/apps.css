@@ -717,6 +717,10 @@
   border-radius: 50%;
   background: repeating-radial-gradient(circle, rgba(0, 0, 0, 0.12) 0 2px, transparent 2px 6px);
 }
+.music-now > :not(.disc) {
+  position: relative;
+  z-index: 1;
+}
 .music-now h2 {
   margin: 0;
   font-size: 2.6rem;
@@ -991,4 +995,169 @@ body[data-screen='browser'] #hints {
   border-radius: var(--r-pill);
   background: rgba(10, 12, 18, 0.82);
   backdrop-filter: blur(10px);
+}
+
+/* ==========================================================================
+   Kleine Bildschirme (Smartphone) – Konsolen-Layout kompakt umbrechen
+   ========================================================================== */
+@media (pointer: coarse) {
+  #hints {
+    display: none;
+  }
+}
+@media (orientation: portrait) and (max-width: 760px) {
+  :root {
+    font-size: 2.35vw;
+  }
+  .home-screen {
+    --pad-x: 1.5rem;
+  }
+  .home-info {
+    grid-template-columns: 1fr;
+    margin-top: 2.5rem;
+    gap: 1.5rem;
+  }
+  .info-title {
+    font-size: 3.2rem;
+  }
+  .home-clock,
+  .top-avatar .ta-name,
+  .top-avatar .ta-score {
+    display: none;
+  }
+  .top-avatar {
+    padding: 0.3rem;
+  }
+  .cards-row,
+  .xb-grid {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .app-header {
+    padding: 0 1.5rem;
+  }
+  .settings-body {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    padding: 0 1.5rem 2rem;
+    gap: 1rem;
+  }
+  .set-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: 0.5rem;
+  }
+  .set-nav .row-btn {
+    width: auto;
+    flex: none;
+  }
+  .set-panel {
+    padding: 1.5rem;
+  }
+  .credit-line {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+  }
+  .key-table {
+    grid-template-columns: repeat(4, 1fr);
+    font-size: 0.85rem;
+  }
+  .form-screen {
+    grid-template-columns: 1fr;
+    padding: 2rem 1.5rem;
+    gap: 1.5rem;
+    overflow-y: auto;
+    align-content: start;
+  }
+  .form-intro h1 {
+    font-size: 2.4rem;
+    margin-top: 1.5rem;
+  }
+  .form-intro p {
+    display: none;
+  }
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .terms-screen {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    padding: 1.5rem;
+    gap: 1rem;
+  }
+  .terms-side p,
+  .terms-warn {
+    display: none;
+  }
+  .terms-side h1 {
+    font-size: 2.2rem;
+    margin: 0.5rem 0 0;
+  }
+  .terms-doc {
+    padding: 1.5rem;
+  }
+  .users-head {
+    left: 1.5rem;
+    right: 1.5rem;
+  }
+  .users-foot {
+    left: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .store-screen .store-scroll,
+  .ach-body,
+  .search-body {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+  .store-grid,
+  .lib-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .ach-grid,
+  .search-results {
+    grid-template-columns: 1fr;
+  }
+  .music-body {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 1rem 1.5rem 3rem;
+    overflow-y: auto;
+  }
+  .disc {
+    width: 16rem;
+    height: 16rem;
+  }
+  .guide {
+    left: 0.75rem;
+    right: 0.75rem;
+    width: auto;
+  }
+  .cc-panel {
+    padding: 0 1rem 1rem;
+  }
+  .cc-cards,
+  .cc-bar {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .cc-right {
+    display: none;
+  }
+  .cc-pop {
+    width: 100%;
+  }
+  .product .p-body {
+    padding: 1.5rem;
+  }
+  .product h2 {
+    font-size: 3rem;
+  }
+  .product .p-facts {
+    grid-template-columns: repeat(2, auto);
+  }
+  .dialog {
+    padding: 1.75rem;
+  }
 }

@@ -5,13 +5,13 @@ import { initInput } from './core/input.js';
 import { screens } from './core/screens.js';
 import { api } from './core/api.js';
 import { initHints } from './ui/hints.js';
-import { initToasts } from './ui/toast.js';
+import { initToasts, toast } from './ui/toast.js';
 import { initDialogs } from './ui/dialog.js';
 import { powerScreen } from './apps/power.js';
 import { bootScreen } from './apps/boot.js';
 import { termsScreen } from './apps/terms.js';
 import { usersScreen, loginScreen, registerScreen } from './apps/users.js';
-import { afterBoot } from './apps/flow.js';
+import { afterBoot, signOut } from './apps/flow.js';
 import { registerApps } from './apps/registry.js';
 import { toggleControlCenter, toggleGuide } from './apps/overlays.js';
 import { logoMark } from './ui/logo.js';
@@ -60,6 +60,12 @@ async function main() {
     if (instance.recent) pushRecent({ id: name, params, ...instance.recent });
     fab.style.display = SYSTEM_SCREENS.includes(name) ? 'none' : '';
     document.body.dataset.screen = name;
+  });
+
+  // Sitzung auf dem Server abgelaufen → zurück zur Benutzerauswahl
+  bus.on('session-expired', () => {
+    toast({ title: 'Sitzung abgelaufen', body: 'Bitte melde dich erneut an.', iconName: 'log-out', force: true });
+    signOut();
   });
 
   await api.init();

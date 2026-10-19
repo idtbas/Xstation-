@@ -1,0 +1,32 @@
+# Veröffentlicht die Oberfläche als statische Seite auf GitHub Pages (lokaler Modus,
+# ohne Server: Konten nur im Browser, Browser-App ohne Proxy).
+# Einmalig aktivieren: Repository → Settings → Pages → Source: „GitHub Actions“.
+# Danach unter Actions → „GitHub Pages“ → „Run workflow“ starten.
+name: GitHub Pages
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -568,13 +568,15 @@ export function homeScreen() {
       ambient.stop();
       unsubs.splice(0).forEach((u) => u());
     },
+    destroy() {
+      ambient.destroy();
+    },
     onBack() {
       if (scroll.scrollTop > 10) {
         const tile = row.querySelector(`[data-id="${focusedId}"]`) || row.querySelector('.tile');
         nav.focus(tile, { sound: true });
         return true;
       }
-      toggleControlCenter();
       return true;
     },
   };

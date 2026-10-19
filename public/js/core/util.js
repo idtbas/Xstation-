@@ -20,16 +20,16 @@ export function relativeTime(ts) {
   return days === 1 ? 'gestern' : `vor ${days} Tagen`;
 }
 
-// Live-Uhr, die sich jede Sekunde aktualisiert und beim Entfernen aufräumt.
+// Live-Uhr: ein gemeinsamer Takt aktualisiert alle Uhren im Dokument.
+let clockTimer = null;
 export function clockEl(cls = '') {
-  const el = h('div', { class: cls });
-  const tick = () => {
-    if (!el.isConnected && el.dataset.started) return clearInterval(timer);
-    el.dataset.started = '1';
-    el.textContent = formatTime();
-  };
-  const timer = setInterval(tick, 1000);
-  tick();
+  const el = h('div', { class: cls, dataset: { clock: '' } }, formatTime());
+  if (!clockTimer) {
+    clockTimer = setInterval(() => {
+      const text = formatTime();
+      for (const c of document.querySelectorAll('[data-clock]')) if (c.textContent !== text) c.textContent = text;
+    }, 1000);
+  }
   return el;
 }
 

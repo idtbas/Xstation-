@@ -122,7 +122,7 @@ function openControlCenter() {
   function ccCard({ kicker, kIcon, title, sub, art, extra, onClick, delay = 0 }) {
     const el = h(
       'button.cc-card.nav',
-      { style: { animationDelay: `${delay}ms` } },
+      { class: art ? '' : 'plain', style: { animationDelay: `${delay}ms` } },
       art ? h('div.cc-art', { style: { backgroundImage: `url("${art}")` } }) : null,
       art ? h('div.cc-shade') : null,
       h('div.cc-k', icon(kIcon), kicker),

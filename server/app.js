@@ -324,12 +324,17 @@ export function createApp({ dataDir = null, allowPrivateProxy = false, trustProx
   route('POST', '/api/auth/login', async (req) => {
     const body = await readJson(req);
     const username = String(body.username || '').trim();
-    if (!loginLimiter.take(clientIp(req) + '|' + username.toLowerCase())) {
-      throw new HttpError(429, 'Zu viele Anmeldeversuche. Bitte warte ein paar Minuten.');
+    const limitKey = clientIp(req) + '|' + username.toLowerCase();
+    if (loginLimiter.blocked(limitKey)) {
+      throw new HttpError(429, 'Zu viele fehlgeschlagene Anmeldeversuche. Bitte warte ein paar Minuten.');
     }
     const user = db.userByName(username);
     const ok = user && (await verifyPassword(String(body.password || ''), user.passwordHash));
-    if (!ok) throw new HttpError(401, 'Benutzername oder Passwort ist falsch.');
+    if (!ok) {
+      loginLimiter.take(limitKey);
+      throw new HttpError(401, 'Benutzername oder Passwort ist falsch.');
+    }
+    loginLimiter.reset(limitKey);
     if (body.acceptedTerms === TERMS_VERSION && user.termsAccepted?.version !== TERMS_VERSION) {
       user.termsAccepted = { version: TERMS_VERSION, at: Date.now() };
     }

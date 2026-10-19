@@ -78,17 +78,32 @@ export class RateLimiter {
     this.hits = new Map();
   }
 
-  take(key) {
+  entry(key) {
     const now = Date.now();
     let entry = this.hits.get(key);
     if (!entry || now - entry.start > this.windowMs) {
       entry = { start: now, count: 0 };
       this.hits.set(key, entry);
     }
-    entry.count += 1;
     if (this.hits.size > 5000) {
       for (const [k, v] of this.hits) if (now - v.start > this.windowMs) this.hits.delete(k);
     }
+    return entry;
+  }
+
+  // Zählt einen Versuch und meldet, ob er noch erlaubt ist.
+  take(key) {
+    const entry = this.entry(key);
+    entry.count += 1;
     return entry.count <= this.limit;
+  }
+
+  // Prüft, ohne zu zählen.
+  blocked(key) {
+    return this.entry(key).count >= this.limit;
+  }
+
+  reset(key) {
+    this.hits.delete(key);
   }
 }

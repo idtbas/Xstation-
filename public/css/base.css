@@ -85,7 +85,7 @@
   --shadow-lg: 0 1.5rem 4rem rgba(0, 0, 0, 0.55);
   --blur: blur(28px) saturate(150%);
 
-  font-size: max(10px, min(0.8333vw, 1.4815vh));
+  font-size: max(8px, min(0.8333vw, 1.4815vh));
 }
 
 :root[data-accent='blue'] {
@@ -872,11 +872,7 @@ textarea.input {
 #rotate-hint {
   display: none;
 }
-@media (orientation: portrait) and (max-width: 760px) {
-  :root {
-    font-size: 2.35vw;
-  }
-}
+
 
 /* Fokussierbare Textblöcke (zum Scrollen mit dem Controller) */
 .focus-block {
