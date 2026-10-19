@@ -1,0 +1,566 @@
+/* ==========================================================================
+   Einschalten, Boot, Nutzungsbedingungen, Benutzerauswahl, Anmeldung
+   ========================================================================== */
+
+/* ---------- Logo ---------- */
+.xs-mark {
+  display: inline-block;
+  flex: none;
+}
+.xs-logo {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--logo-size) * 0.35);
+}
+.xs-word {
+  font-size: calc(var(--logo-size) * 0.62);
+  letter-spacing: 0.32em;
+  font-weight: 300;
+  white-space: nowrap;
+}
+.xs-word b {
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  background: linear-gradient(100deg, #6aa8ff, #5be35b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.xs-word i {
+  font-style: normal;
+  color: var(--text-3);
+  letter-spacing: 0.12em;
+}
+
+/* ---------- Ausgeschaltet ---------- */
+.power-screen {
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+}
+.power-btn {
+  width: 9rem;
+  height: 9rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  position: relative;
+  color: rgba(255, 255, 255, 0.85);
+  transition: transform var(--t-med) var(--ease-ps), color var(--t-med);
+}
+.power-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  padding: 0.2rem;
+  background: conic-gradient(from 0deg, #0a6cff, #00c2ff, #10a310, #9bf00b, #10a310, #00c2ff, #0a6cff);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: spin 6s linear infinite;
+  opacity: 0.75;
+}
+.power-btn::after {
+  content: '';
+  position: absolute;
+  inset: -2rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(25, 166, 181, 0.35), transparent 65%);
+  opacity: 0.5;
+  transition: opacity var(--t-med);
+  z-index: -1;
+}
+.power-btn .icon {
+  width: 3.4rem;
+  height: 3.4rem;
+  stroke-width: 1.5;
+}
+.power-btn.focused,
+.power-btn:hover {
+  transform: scale(1.06);
+  color: #fff;
+}
+.power-btn.focused::after,
+.power-btn:hover::after {
+  opacity: 1;
+}
+.power-btn.pressing {
+  animation: power-press 700ms var(--ease-out) forwards;
+}
+@keyframes power-press {
+  30% {
+    transform: scale(0.92);
+    filter: brightness(2);
+  }
+  to {
+    transform: scale(1.3);
+    opacity: 0;
+    filter: brightness(3) blur(6px);
+  }
+}
+.power-label {
+  font-size: 1.6rem;
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  margin-top: 1rem;
+}
+.power-sub {
+  color: var(--text-3);
+  font-size: 1.05rem;
+  animation: pulse-soft 2.6s ease-in-out infinite;
+}
+.power-foot {
+  position: absolute;
+  bottom: 2rem;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.28);
+}
+
+/* ---------- Boot ---------- */
+.boot-screen {
+  background: #000;
+}
+.boot-screen canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.boot-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3rem;
+  pointer-events: none;
+}
+.boot-logo {
+  opacity: 0;
+  transform: scale(0.94);
+  filter: blur(10px);
+  transition: opacity 1400ms var(--ease-out), transform 2200ms var(--ease-out), filter 1400ms var(--ease-out);
+}
+.boot-logo .xs-word {
+  letter-spacing: 0.7em;
+  transition: letter-spacing 2600ms var(--ease-out);
+}
+.boot-screen.show-logo .boot-logo {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+.boot-screen.show-logo .boot-logo .xs-word {
+  letter-spacing: 0.32em;
+}
+.boot-prompt {
+  opacity: 0;
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: var(--text-2);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: opacity 900ms var(--ease-out);
+}
+.boot-screen.show-prompt .boot-prompt {
+  opacity: 1;
+  animation: pulse-soft 2.4s 1s ease-in-out infinite;
+}
+.boot-skip {
+  position: absolute;
+  right: 2.5rem;
+  bottom: 2rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.3);
+}
+.boot-screen .shine {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(110deg, transparent 40%, rgba(255, 255, 255, 0.08) 50%, transparent 60%);
+  background-size: 250% 100%;
+  background-position: 120% 0;
+  opacity: 0;
+}
+.boot-screen.show-logo .shine {
+  animation: shine-sweep 2.4s 0.8s var(--ease-in-out) forwards;
+}
+@keyframes shine-sweep {
+  0% {
+    opacity: 1;
+    background-position: 120% 0;
+  }
+  100% {
+    opacity: 1;
+    background-position: -30% 0;
+  }
+}
+
+/* ---------- Gemeinsamer Bühnen-Hintergrund für Setup-Bildschirme ---------- */
+.stage-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 70% at 15% 10%, rgba(10, 108, 255, 0.28), transparent 60%),
+    radial-gradient(ellipse 70% 60% at 90% 90%, rgba(16, 163, 16, 0.22), transparent 60%),
+    linear-gradient(180deg, #060a14, #04060b);
+}
+.stage-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 2.4rem 2.4rem;
+  mask-image: radial-gradient(ellipse at center, #000 20%, transparent 75%);
+}
+
+/* ---------- Nutzungsbedingungen ---------- */
+.terms-screen {
+  display: grid;
+  grid-template-columns: 30rem 1fr;
+  gap: 4rem;
+  padding: 5rem 6rem 6rem;
+}
+.terms-side {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  animation: rise-in 700ms var(--ease-out) both;
+}
+.terms-side h1 {
+  font-size: 3.2rem;
+  font-weight: 300;
+  margin: 2rem 0 0;
+  line-height: 1.1;
+}
+.terms-side p {
+  color: var(--text-2);
+  font-size: 1.15rem;
+  line-height: 1.55;
+  margin: 0;
+}
+.terms-meta {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.terms-warn {
+  margin-top: auto;
+  display: flex;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: var(--r-md);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--line);
+  color: var(--text-2);
+  font-size: 1rem;
+  line-height: 1.45;
+}
+.terms-warn .icon {
+  width: 1.8rem;
+  height: 1.8rem;
+  color: #ffd166;
+}
+.terms-main {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  gap: 1.25rem;
+  animation: rise-in 800ms 100ms var(--ease-out) both;
+}
+.terms-doc {
+  flex: 1;
+  min-height: 0;
+  border-radius: var(--r-lg);
+  padding: 2.5rem 3rem;
+  font-size: 1.12rem;
+  line-height: 1.65;
+  color: var(--text-2);
+  transition: box-shadow var(--t-med) var(--ease-ps), border-color var(--t-med);
+}
+.terms-doc.focused {
+  border-color: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3), 0 0 2rem rgba(255, 255, 255, 0.08);
+}
+.terms-doc h3 {
+  color: var(--text);
+  font-weight: 600;
+  font-size: 1.3rem;
+  margin: 2rem 0 0.6rem;
+}
+.terms-doc h3:first-child {
+  margin-top: 0;
+}
+.terms-doc p {
+  margin: 0 0 0.8rem;
+}
+.terms-progress {
+  height: 0.25rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+.terms-progress > div {
+  height: 100%;
+  width: 0;
+  background: var(--accent-grad);
+  transition: width 200ms linear;
+}
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  padding: 0.9rem 1.25rem;
+  border-radius: var(--r-md);
+  background: rgba(255, 255, 255, 0.05);
+  text-align: left;
+  font-size: 1.08rem;
+  line-height: 1.4;
+  color: var(--text);
+  width: 100%;
+}
+.check-row .box {
+  flex: none;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 0.45rem;
+  border: 0.15rem solid rgba(255, 255, 255, 0.5);
+  display: grid;
+  place-items: center;
+  transition: background var(--t-fast), border-color var(--t-fast), transform var(--t-med) var(--ease-spring);
+}
+.check-row .box .icon {
+  width: 1.3rem;
+  height: 1.3rem;
+  stroke-width: 3;
+  opacity: 0;
+  transform: scale(0.4);
+  transition: opacity var(--t-fast), transform var(--t-med) var(--ease-spring);
+}
+.check-row.checked .box {
+  background: var(--accent-grad);
+  border-color: transparent;
+}
+.check-row.checked .box .icon {
+  opacity: 1;
+  transform: none;
+}
+.check-row.focused {
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 0 0.15rem #fff;
+}
+.terms-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+/* ---------- Benutzerauswahl (PS5: „Wer benutzt …?“) ---------- */
+.users-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.users-head {
+  position: absolute;
+  top: 3rem;
+  left: 5rem;
+  right: 5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.users-clock {
+  font-size: 1.6rem;
+  font-weight: 300;
+}
+.users-title {
+  font-size: 2.8rem;
+  font-weight: 300;
+  margin: 0 0 4.5rem;
+  animation: rise-in 700ms var(--ease-out) both;
+}
+.users-row {
+  display: flex;
+  gap: 3.5rem;
+  align-items: flex-start;
+  justify-content: center;
+  flex-wrap: wrap;
+  max-width: 90vw;
+}
+.user-card {
+  width: 11rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  animation: rise-in 700ms var(--ease-out) both;
+}
+.user-card .avatar,
+.user-card .add-circle {
+  width: 9rem;
+  height: 9rem;
+  transition: transform var(--t-med) var(--ease-ps), box-shadow var(--t-med) var(--ease-ps);
+  border-radius: 50%;
+}
+.user-card .add-circle {
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 0.15rem dashed rgba(255, 255, 255, 0.3);
+}
+.user-card .add-circle .icon {
+  width: 3rem;
+  height: 3rem;
+}
+.user-card .u-name {
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: var(--text-2);
+  text-align: center;
+  transition: color var(--t-fast);
+}
+.user-card .u-sub {
+  font-size: 0.95rem;
+  color: var(--text-3);
+  margin-top: -0.75rem;
+}
+.user-card.focused .avatar,
+.user-card.focused .add-circle {
+  transform: scale(1.12);
+  box-shadow: 0 0 0 0.25rem var(--bg), 0 0 0 0.45rem #fff, 0 0 3rem rgba(255, 255, 255, 0.25);
+}
+.user-card.focused .u-name {
+  color: #fff;
+}
+.users-foot {
+  position: absolute;
+  left: 5rem;
+  bottom: 2.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+.mode-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.95rem;
+  color: var(--text-2);
+}
+.mode-chip .led {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: var(--online);
+  box-shadow: 0 0 0.6rem var(--online);
+}
+.mode-chip.local .led {
+  background: var(--away);
+  box-shadow: 0 0 0.6rem var(--away);
+}
+
+/* ---------- Formulare (Anmelden / Registrieren) ---------- */
+.form-screen {
+  display: grid;
+  grid-template-columns: 1fr 44rem;
+  align-items: center;
+  gap: 5rem;
+  padding: 0 7rem;
+}
+.form-intro {
+  position: relative;
+  animation: rise-in 700ms var(--ease-out) both;
+}
+.form-intro h1 {
+  font-size: 3.6rem;
+  font-weight: 300;
+  margin: 2.5rem 0 1rem;
+  line-height: 1.08;
+}
+.form-intro p {
+  font-size: 1.2rem;
+  color: var(--text-2);
+  line-height: 1.6;
+  max-width: 36rem;
+}
+.form-panel {
+  position: relative;
+  border-radius: var(--r-lg);
+  padding: 2.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  max-height: 88vh;
+  animation: rise-in 800ms 80ms var(--ease-out) both;
+}
+.form-panel h2 {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 500;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem 1.25rem;
+}
+.avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 0.75rem;
+}
+.avatar-pick {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  position: relative;
+}
+.avatar-pick .avatar {
+  width: 100%;
+  height: 100%;
+  transition: transform var(--t-med) var(--ease-ps);
+}
+.avatar-pick.selected::after {
+  content: '';
+  position: absolute;
+  inset: -0.3rem;
+  border-radius: 50%;
+  border: 0.18rem solid var(--online);
+}
+.avatar-pick.focused .avatar {
+  transform: scale(1.12);
+  box-shadow: 0 0 0 0.2rem #fff, 0 0 1.5rem rgba(255, 255, 255, 0.35);
+}
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+.link-btn {
+  color: var(--text-2);
+  font-size: 1rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--r-sm);
+}
+.link-btn.focused,
+.link-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+.form-error {
+  color: #ff8a80;
+  min-height: 1.4em;
+  font-size: 1rem;
+}

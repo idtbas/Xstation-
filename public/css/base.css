@@ -1,0 +1,870 @@
+/* ==========================================================================
+   X-Station – Design-System
+   50/50: PS5-Tiefe, Licht & Bewegung  ×  Xbox-Acryl, Kacheln & Grün
+   ========================================================================== */
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../fonts/inter-latin-wght-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../fonts/inter-latin-ext-wght-normal.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF,
+    U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+:root {
+  color-scheme: dark;
+
+  /* Markenfarben */
+  --ps-blue: #0a6cff;
+  --ps-blue-deep: #00308f;
+  --xb-green: #10a310;
+  --xb-green-deep: #0b5e0b;
+  --xb-lime: #9bf00b;
+
+  /* Akzent (wird über data-accent umgeschaltet) */
+  --accent: #19a6b5;
+  --accent-2: #0a6cff;
+  --accent-3: #10a310;
+  --accent-grad: linear-gradient(100deg, var(--ps-blue) 0%, #0f8fb8 50%, var(--xb-green) 100%);
+  --accent-glow: rgba(25, 166, 181, 0.45);
+
+  /* Flächen */
+  --bg: #04060b;
+  --bg-2: #0a0e16;
+  --panel: rgba(18, 22, 31, 0.74);
+  --panel-strong: rgba(14, 17, 24, 0.9);
+  --panel-solid: #121620;
+  --panel-hi: rgba(255, 255, 255, 0.07);
+  --panel-hi-2: rgba(255, 255, 255, 0.12);
+  --line: rgba(255, 255, 255, 0.1);
+  --line-2: rgba(255, 255, 255, 0.18);
+
+  /* Text */
+  --text: #f4f6fb;
+  --text-2: rgba(232, 238, 249, 0.72);
+  --text-3: rgba(232, 238, 249, 0.48);
+  --text-inv: #0b0e14;
+
+  /* Status */
+  --online: #3ddc4a;
+  --busy: #ff5a4f;
+  --away: #f5b532;
+  --offline: #7d8594;
+  --danger: #ff5a4f;
+
+  /* Formen */
+  --r-xs: 0.375rem;
+  --r-sm: 0.625rem;
+  --r-md: 0.875rem;
+  --r-lg: 1.25rem;
+  --r-pill: 999px;
+
+  /* Bewegung – überwiegend PS5-artig: weich, gedämpft, ohne Überschwingen */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-ps: cubic-bezier(0.25, 0.9, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-in: cubic-bezier(0.55, 0, 0.75, 0.2);
+  --ease-spring: cubic-bezier(0.34, 1.36, 0.64, 1);
+  --t-fast: 160ms;
+  --t-med: 320ms;
+  --t-slow: 600ms;
+  --t-bg: 900ms;
+
+  --focus-ring: 0 0 0 0.1875rem #fff, 0 0 1.75rem rgba(255, 255, 255, 0.28), 0 0.75rem 2.5rem rgba(0, 0, 0, 0.55);
+  --shadow-lg: 0 1.5rem 4rem rgba(0, 0, 0, 0.55);
+  --blur: blur(28px) saturate(150%);
+
+  font-size: max(10px, min(0.8333vw, 1.4815vh));
+}
+
+:root[data-accent='blue'] {
+  --accent: #2b7bff;
+  --accent-grad: linear-gradient(100deg, #0a4fd6 0%, #2b8bff 100%);
+  --accent-glow: rgba(43, 123, 255, 0.45);
+}
+:root[data-accent='green'] {
+  --accent: #21b521;
+  --accent-grad: linear-gradient(100deg, #0e7a0e 0%, #2ccf2c 100%);
+  --accent-glow: rgba(33, 181, 33, 0.45);
+}
+:root[data-accent='hybrid'] {
+  --accent: #19a6b5;
+}
+
+:root[data-motion='reduced'] {
+  --t-fast: 1ms;
+  --t-med: 1ms;
+  --t-slow: 1ms;
+  --t-bg: 1ms;
+}
+:root[data-textsize='large'] {
+  font-size: max(12px, min(0.95vw, 1.69vh));
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-feature-settings: 'cv11', 'ss01';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body[data-input='gamepad'],
+body[data-input='keyboard'] {
+  cursor: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+}
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+  user-select: text;
+}
+:focus {
+  outline: none;
+}
+:focus-visible {
+  outline: none;
+}
+img,
+svg {
+  display: block;
+}
+a {
+  color: inherit;
+}
+
+.icon {
+  width: 1.5em;
+  height: 1.5em;
+  flex: none;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- App-Gerüst ---------- */
+#app {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--bg);
+}
+.layer-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+#screens {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+.screen {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+#overlays {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+}
+#overlays > * {
+  pointer-events: auto;
+}
+#toasts {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  pointer-events: none;
+}
+
+/* ---------- Bildschirm-Übergänge (PS5: weicher Zoom + Blende) ---------- */
+.screen.enter-zoom {
+  animation: screen-in-zoom var(--t-slow) var(--ease-out) both;
+}
+.screen.leave-zoom {
+  animation: screen-out-zoom calc(var(--t-slow) * 0.7) var(--ease-in-out) both;
+}
+.screen.enter-back {
+  animation: screen-in-back var(--t-slow) var(--ease-out) both;
+}
+.screen.leave-back {
+  animation: screen-out-back calc(var(--t-slow) * 0.7) var(--ease-in-out) both;
+}
+.screen.enter-fade {
+  animation: fade-in var(--t-slow) var(--ease-out) both;
+}
+.screen.leave-fade {
+  animation: fade-out calc(var(--t-slow) * 0.6) linear both;
+}
+@keyframes screen-in-zoom {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+@keyframes screen-out-zoom {
+  to {
+    opacity: 0;
+    transform: scale(1.06);
+    filter: blur(4px);
+  }
+}
+@keyframes screen-in-back {
+  from {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes screen-out-back {
+  to {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(1.5rem);
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes pulse-soft {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+/* ---------- Fokus (PS5: weißer Rahmen, sanftes Anheben) ---------- */
+.nav {
+  position: relative;
+  transition: transform var(--t-med) var(--ease-ps), box-shadow var(--t-med) var(--ease-ps), background-color var(--t-fast),
+    color var(--t-fast), opacity var(--t-med);
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  height: 3.25rem;
+  padding: 0 1.75rem;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text);
+  font-size: 1.125rem;
+  font-weight: 500;
+  white-space: nowrap;
+  backdrop-filter: blur(12px);
+}
+.btn .icon {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+.btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+.btn.focused {
+  background: #fff;
+  color: var(--text-inv);
+  transform: scale(1.04);
+  box-shadow: 0 0 0 0.1875rem rgba(255, 255, 255, 0.35), 0 0.75rem 2rem rgba(0, 0, 0, 0.45);
+}
+.btn-primary {
+  background: var(--accent-grad);
+  color: #fff;
+}
+.btn-primary:hover {
+  filter: brightness(1.1);
+  background: var(--accent-grad);
+}
+.btn-primary.focused {
+  background: var(--accent-grad);
+  color: #fff;
+  box-shadow: 0 0 0 0.1875rem #fff, 0 0 2rem var(--accent-glow), 0 0.75rem 2rem rgba(0, 0, 0, 0.45);
+}
+.btn-danger.focused {
+  background: var(--danger);
+  color: #fff;
+}
+.btn-icon {
+  width: 3.25rem;
+  padding: 0;
+}
+.btn-lg {
+  height: 3.75rem;
+  padding: 0 2.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+.btn-sm {
+  height: 2.5rem;
+  padding: 0 1.1rem;
+  font-size: 0.95rem;
+}
+.btn-sm.btn-icon {
+  width: 2.5rem;
+  padding: 0;
+}
+.btn[disabled],
+.btn.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  color: var(--text);
+}
+.icon-btn .icon {
+  width: 1.6rem;
+  height: 1.6rem;
+}
+.icon-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.icon-btn.focused {
+  background: #fff;
+  color: var(--text-inv);
+  transform: scale(1.08);
+  box-shadow: 0 0 1.5rem rgba(255, 255, 255, 0.3);
+}
+
+/* ---------- Eingabefelder ---------- */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.field label {
+  font-size: 0.95rem;
+  color: var(--text-2);
+  font-weight: 500;
+}
+.input {
+  height: 3.5rem;
+  padding: 0 1.25rem;
+  border-radius: var(--r-sm);
+  border: 0.125rem solid var(--line);
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 1.15rem;
+  transition: border-color var(--t-fast), background var(--t-fast), box-shadow var(--t-med) var(--ease-ps);
+}
+.input::placeholder {
+  color: var(--text-3);
+}
+.input.focused,
+.input:focus {
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 1.5rem rgba(255, 255, 255, 0.15);
+}
+textarea.input {
+  height: auto;
+  min-height: 6rem;
+  padding: 1rem 1.25rem;
+  resize: none;
+}
+.field-error {
+  color: #ff8a80;
+  font-size: 0.95rem;
+  min-height: 1.3em;
+}
+
+/* ---------- Schalter (Xbox-Toggle, PS5-Farben) ---------- */
+.toggle {
+  width: 3.5rem;
+  height: 2rem;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.18);
+  position: relative;
+  flex: none;
+  transition: background var(--t-med) var(--ease-ps);
+}
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 0.25rem;
+  left: 0.25rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform var(--t-med) var(--ease-spring);
+  box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.35);
+}
+.toggle.on {
+  background: var(--accent-grad);
+}
+.toggle.on::after {
+  transform: translateX(1.5rem);
+}
+
+/* ---------- Panels / Acryl ---------- */
+.acrylic {
+  background: var(--panel);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border: 1px solid var(--line);
+}
+
+/* ---------- Avatare ---------- */
+.avatar {
+  position: relative;
+  flex: none;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+}
+.avatar svg {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+.avatar .dot {
+  position: absolute;
+  right: 2%;
+  bottom: 2%;
+  width: 30%;
+  height: 30%;
+  border-radius: 50%;
+  border: 0.18rem solid var(--bg-2);
+  background: var(--offline);
+}
+.avatar .dot[data-status='online'] {
+  background: var(--online);
+}
+.avatar .dot[data-status='busy'] {
+  background: var(--busy);
+}
+.avatar .dot[data-status='away'] {
+  background: var(--away);
+}
+
+/* ---------- Ladeindikator ---------- */
+.spinner {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 0.2rem solid rgba(255, 255, 255, 0.15);
+  border-top-color: #fff;
+  animation: spin 0.9s linear infinite;
+}
+
+/* ---------- Tastenhinweise (unten rechts, Xbox-Legende) ---------- */
+#hints {
+  position: absolute;
+  right: 2.5rem;
+  bottom: 1.75rem;
+  z-index: 30;
+  display: flex;
+  gap: 1.75rem;
+  font-size: 0.95rem;
+  color: var(--text-2);
+  pointer-events: none;
+  transition: opacity var(--t-med);
+}
+#hints:empty {
+  opacity: 0;
+}
+.hint {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+.glyph {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.6rem;
+  height: 1.6rem;
+  padding: 0 0.4rem;
+  border-radius: 0.35rem;
+  border: 1px solid var(--line-2);
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+.glyph.pad {
+  border-radius: 50%;
+  padding: 0;
+  width: 1.6rem;
+  border: 0;
+  color: #fff;
+}
+.glyph.pad svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+/* ---------- Toasts (PS5: oben rechts einschieben) ---------- */
+.toast {
+  width: 26rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-radius: var(--r-md);
+  background: rgba(22, 26, 36, 0.92);
+  backdrop-filter: var(--blur);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-lg);
+  animation: toast-in 520ms var(--ease-out) both;
+  pointer-events: auto;
+}
+.toast.out {
+  animation: toast-out 380ms var(--ease-in-out) both;
+}
+.toast .t-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--accent-grad);
+  flex: none;
+}
+.toast .t-icon .icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+.toast .t-title {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+.toast .t-body {
+  color: var(--text-2);
+  font-size: 0.95rem;
+  margin-top: 0.15rem;
+  line-height: 1.35;
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(3rem) scale(0.98);
+  }
+}
+@keyframes toast-out {
+  to {
+    opacity: 0;
+    transform: translateX(2rem);
+  }
+}
+
+/* ---------- Erfolg (Xbox: Kreis ploppt auf, dehnt sich zur Pille) ---------- */
+.achv-toast {
+  position: absolute;
+  left: 50%;
+  bottom: 6rem;
+  z-index: 45;
+  height: 5rem;
+  display: flex;
+  align-items: center;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.achv-pill {
+  height: 5rem;
+  width: 5rem;
+  border-radius: var(--r-pill);
+  background: rgba(14, 16, 22, 0.94);
+  border: 1px solid var(--line-2);
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.6), 0 0 2.5rem var(--accent-glow);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  animation: achv-pop 420ms var(--ease-spring) both, achv-expand 620ms 420ms var(--ease-out) forwards;
+}
+.achv-toast.out .achv-pill {
+  animation: achv-collapse 420ms var(--ease-in-out) forwards;
+}
+.achv-badge {
+  flex: none;
+  width: 5rem;
+  height: 5rem;
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+.achv-badge::before {
+  content: '';
+  position: absolute;
+  inset: 0.55rem;
+  border-radius: 50%;
+  background: var(--accent-grad);
+  box-shadow: 0 0 1.5rem var(--accent-glow);
+}
+.achv-badge .icon {
+  position: relative;
+  width: 1.9rem;
+  height: 1.9rem;
+}
+.achv-text {
+  padding: 0 2rem 0 0.75rem;
+  white-space: nowrap;
+  opacity: 0;
+  animation: fade-in 400ms 820ms both;
+}
+.achv-text .a1 {
+  font-size: 0.9rem;
+  color: var(--text-2);
+}
+.achv-text .a2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-top: 0.15rem;
+}
+.achv-text .a2 b {
+  color: var(--xb-lime);
+  font-weight: 700;
+  margin-right: 0.35rem;
+}
+@keyframes achv-pop {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+@keyframes achv-expand {
+  to {
+    width: 30rem;
+  }
+}
+@keyframes achv-collapse {
+  from {
+    width: 30rem;
+  }
+  60% {
+    width: 5rem;
+    opacity: 1;
+  }
+  to {
+    width: 5rem;
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+
+/* ---------- Dialoge (PS5-Modal, mittig) ---------- */
+.dialog-backdrop {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  animation: fade-in var(--t-med) var(--ease-out) both;
+  z-index: 35;
+}
+.dialog-backdrop.out {
+  animation: fade-out 260ms linear both;
+}
+.dialog {
+  width: min(40rem, 92vw);
+  max-height: 86vh;
+  overflow: auto;
+  padding: 2.5rem;
+  border-radius: var(--r-lg);
+  background: var(--panel-strong);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-lg);
+  animation: dialog-in 480ms var(--ease-out) both;
+}
+.dialog-backdrop.out .dialog {
+  animation: dialog-out 260ms var(--ease-in-out) both;
+}
+.dialog h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.9rem;
+  font-weight: 300;
+}
+.dialog p {
+  margin: 0 0 0.75rem;
+  color: var(--text-2);
+  line-height: 1.55;
+  font-size: 1.1rem;
+}
+.dialog .code {
+  font-size: 0.95rem;
+  color: var(--text-3);
+  letter-spacing: 0.04em;
+}
+.dialog .actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+.dialog .dlg-icon {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  margin-bottom: 1.25rem;
+}
+.dialog .dlg-icon .icon {
+  width: 2rem;
+  height: 2rem;
+}
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(1.5rem) scale(0.97);
+  }
+}
+@keyframes dialog-out {
+  to {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+/* ---------- Scrollbereiche ---------- */
+.scroll-y {
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+.scroll-y::-webkit-scrollbar {
+  width: 0.4rem;
+}
+.scroll-y::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 1rem;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---------- Badges ---------- */
+.badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.35rem;
+  border-radius: var(--r-pill);
+  background: var(--danger);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.pill-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  height: 1.75rem;
+  padding: 0 0.75rem;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-2);
+}
+.pill-tag.green {
+  background: rgba(16, 163, 16, 0.22);
+  color: #8ff08f;
+}
+.pill-tag.blue {
+  background: rgba(10, 108, 255, 0.22);
+  color: #9cc4ff;
+}
+
+/* ---------- Hochformat-Hinweis ---------- */
+#rotate-hint {
+  display: none;
+}
+@media (orientation: portrait) and (max-width: 760px) {
+  :root {
+    font-size: 2.35vw;
+  }
+}

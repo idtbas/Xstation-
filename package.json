@@ -1,0 +1,21 @@
+{
+  "name": "x-station",
+  "version": "1.0.0",
+  "private": true,
+  "description": "X-Station – eine inoffizielle Fan-Web-App, deren Oberfläche PlayStation- und Xbox-Konzepte 50/50 verschmilzt.",
+  "type": "module",
+  "main": "server/index.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "test": "node --test test/",
+    "icons": "node scripts/build-icons.mjs",
+    "screenshots": "node scripts/screenshots.mjs"
+  },
+  "devDependencies": {
+    "lucide-static": "^1.59.0"
+  }
+}
