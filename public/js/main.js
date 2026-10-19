@@ -17,7 +17,7 @@ import { registerApps } from './apps/registry.js';
 import { toggleControlCenter, toggleGuide, openControlCenter } from './apps/overlays.js';
 import { keyboardForInput } from './ui/osk.js';
 import { logoMark } from './ui/logo.js';
-import { isMobileDevice, renderDesktopOnly } from './core/device.js';
+import { deviceKind, renderDesktopOnly, waitForController, watchController } from './core/device.js';
 
 const SYSTEM_SCREENS = ['power', 'boot', 'terms', 'users', 'login', 'register', 'rest'];
 
@@ -34,10 +34,19 @@ function pageScroll(dir) {
 
 async function main() {
   applyPrefs();
-  if (isMobileDevice()) {
-    document.getElementById('app').replaceChildren();
-    renderDesktopOnly(document.getElementById('app'));
+  const app = document.getElementById('app');
+  const kind = deviceKind();
+  if (kind === 'mobile') {
+    app.replaceChildren();
+    renderDesktopOnly(app);
     return;
+  }
+  if (kind === 'ipad') {
+    // iPad nur mit Controller – und im Querformat
+    document.body.classList.add('ipad');
+    document.body.append(Object.assign(document.createElement('div'), { className: 'rotate-hint', textContent: 'Bitte drehe dein iPad ins Querformat.' }));
+    await waitForController(document.body);
+    watchController(document.body);
   }
   initInput();
   const overlays = document.getElementById('overlays');

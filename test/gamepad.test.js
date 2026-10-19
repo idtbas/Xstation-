@@ -1,7 +1,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { BTN, padType, padName, normalizePad, applyDeadzone, buttonActions } from '../public/js/core/gamepad-map.js';
-import { isMobileDevice } from '../public/js/core/device.js';
+import { deviceKind } from '../public/js/core/device.js';
 
 const buttons = (n, pressed = []) => Array.from({ length: n }, (_, i) => ({ pressed: pressed.includes(i), value: pressed.includes(i) ? 1 : 0 }));
 
@@ -96,15 +96,17 @@ describe('Totzone und Tastenbelegung', () => {
   });
 });
 
-describe('Nur Desktop', () => {
-  test('Smartphones und Tablets werden erkannt, Desktops nicht', () => {
+describe('Unterstützte Geräte', () => {
+  test('Desktop ja, iPad (mit Controller) ja, Smartphones und andere Tablets nein', () => {
     const ua = (userAgent, extra = {}) => ({ userAgent, maxTouchPoints: 0, ...extra });
-    assert.equal(isMobileDevice(ua('Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148')), true);
-    assert.equal(isMobileDevice(ua('Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 Chrome/140 Mobile Safari/537.36')), true);
-    assert.equal(isMobileDevice(ua('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15', { maxTouchPoints: 5 })), true, 'iPadOS');
-    assert.equal(isMobileDevice(ua('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/140.0 Safari/537.36')), false);
-    assert.equal(isMobileDevice(ua('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15')), false);
-    assert.equal(isMobileDevice(ua('Mozilla/5.0 (X11; Linux x86_64) Firefox/140.0')), false);
-    assert.equal(isMobileDevice({ userAgent: '', userAgentData: { mobile: true } }), true);
+    assert.equal(deviceKind(ua('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/140.0 Safari/537.36')), 'desktop');
+    assert.equal(deviceKind(ua('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15')), 'desktop');
+    assert.equal(deviceKind(ua('Mozilla/5.0 (X11; Linux x86_64) Firefox/140.0')), 'desktop');
+    assert.equal(deviceKind(ua('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15', { maxTouchPoints: 5 })), 'ipad', 'iPadOS meldet sich als Mac');
+    assert.equal(deviceKind(ua('Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148')), 'ipad');
+    assert.equal(deviceKind(ua('Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148')), 'mobile');
+    assert.equal(deviceKind(ua('Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 Chrome/140 Mobile Safari/537.36')), 'mobile');
+    assert.equal(deviceKind(ua('Mozilla/5.0 (Linux; Android 14; SM-X710) AppleWebKit/537.36 Chrome/140 Safari/537.36')), 'mobile', 'Android-Tablet');
+    assert.equal(deviceKind({ userAgent: '', userAgentData: { mobile: true } }), 'mobile');
   });
 });

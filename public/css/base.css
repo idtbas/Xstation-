@@ -938,3 +938,48 @@ textarea.input {
   height: 1rem;
   stroke-width: 3;
 }
+
+/* ---------- iPad: Controller erforderlich, nur Querformat ---------- */
+.pad-gate {
+  z-index: 100;
+  background: var(--bg);
+}
+.pad-gate.overlay {
+  background: rgba(4, 6, 11, 0.94);
+  backdrop-filter: blur(12px);
+}
+.pad-gate .pg-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--xb-green-deep), var(--xb-green));
+  box-shadow: 0 0 32px rgba(16, 163, 16, 0.45);
+}
+.pad-gate .pg-icon .icon {
+  width: 36px;
+  height: 36px;
+  color: #fff;
+}
+.pad-gate .pg-pulse {
+  animation: pulse-soft 2.2s ease-in-out infinite;
+}
+.rotate-hint {
+  display: none;
+}
+@media (orientation: portrait) {
+  body.ipad .rotate-hint {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 22px;
+    font-weight: 300;
+    text-align: center;
+  }
+}

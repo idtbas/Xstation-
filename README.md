@@ -1,6 +1,6 @@
 # X-Station
 
-**PlayStation × Xbox – 50/50 verschmolzen.** X-Station ist eine Web-App für den **Desktop** (PC/Mac) mit Konsolen-Oberfläche und **vollständiger Xbox-Controller-Unterstützung**: oben die Kachelreihe, die großen Hintergrundbilder und die weichen Animationen der PS5, darunter die Kachel-Blöcke, der seitliche Guide und das Grün der Xbox. Das Ganze ist ein eigenes System mit Konten, Freundesliste, Chat, Erfolgen, Musik und einem funktionierenden Webbrowser.
+**PlayStation × Xbox – 50/50 verschmolzen.** X-Station ist eine Web-App für **PC, Mac und iPad mit Controller** mit Konsolen-Oberfläche und **vollständiger Xbox-Controller-Unterstützung**: oben die Kachelreihe, die großen Hintergrundbilder und die weichen Animationen der PS5, darunter die Kachel-Blöcke, der seitliche Guide und das Grün der Xbox. Das Ganze ist ein eigenes System mit Konten, Freundesliste, Chat, Erfolgen, Musik und einem funktionierenden Webbrowser.
 
 > **Hinweis:** X-Station ist ein inoffizielles Fan-Projekt und steht in **keiner Verbindung** zu Sony Interactive Entertainment oder Microsoft. Es werden **keine offiziellen Engines, Betriebssysteme, Logos, Schriftarten oder Sounds** verwendet. Alle Spiele sind fiktive Platzhalter und **nicht spielbar**. „PlayStation“, „PS5“, „Xbox“ und „Xbox Series X|S“ sind Marken ihrer jeweiligen Inhaber.
 
@@ -69,9 +69,11 @@ Außerdem:
 
 Mit der Maus öffnet die X-Station-Taste unten links das Control Center, ein Rechtsklick darauf öffnet den Guide.
 
-### Nur Desktop
+### Unterstützte Geräte
 
-X-Station ist für Computer gemacht. Auf Smartphones und Tablets erscheint nur ein Hinweis, dass die Seite am PC oder Mac geöffnet werden soll.
+- **PC und Mac:** voll unterstützt (Controller, Tastatur und Maus).
+- **iPad:** unterstützt, **solange ein Controller verbunden ist**. Ohne Controller erscheint „Controller verbinden“. Wird der Controller getrennt, pausiert X-Station, bis er wieder verbunden ist. Nur im Querformat.
+- **Smartphones und Tablets anderer Hersteller:** nicht unterstützt, es erscheint nur ein Hinweis.
 
 ## Screenshots
 
